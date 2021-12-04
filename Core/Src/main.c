@@ -23,9 +23,10 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include <stdbool.h>
 #include "ssd1306.h"
 #include "ssd1306_tests.h"
-#include <stdbool.h>
+#include "display_pages.h"
 
 /* USER CODE END Includes */
 
@@ -102,10 +103,18 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
 
-  //Power ON LED
-  HAL_GPIO_WritePin(PWR_LED_GPIO_Port, PWR_LED_Pin, GPIO_PIN_SET); //Initially off
+  //Initialise pins
+  HAL_GPIO_WritePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(PWR_LED_GPIO_Port, PWR_LED_Pin, GPIO_PIN_RESET);
 
-  ssd1306_TestAll();
+  HAL_Delay(20);
+
+  //Power ON LED
+  HAL_GPIO_WritePin(PWR_LED_GPIO_Port, PWR_LED_Pin, GPIO_PIN_SET);
+
+  //ssd1306_TestAll();
+  ssd1306_Init();
+  ESR_PAGE();
 
   /* USER CODE END 2 */
 
@@ -361,11 +370,21 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(EX_BTN_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : RTRY_SW_Pin RTRY_DT_Pin RTRY_CLK_Pin */
-  GPIO_InitStruct.Pin = RTRY_SW_Pin|RTRY_DT_Pin|RTRY_CLK_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  /*Configure GPIO pin : RTRY_SW_EXTI_Pin */
+  GPIO_InitStruct.Pin = RTRY_SW_EXTI_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(RTRY_SW_EXTI_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : RTRY_DT_EXTI_Pin RTRY_CLK_EXTI_Pin */
+  GPIO_InitStruct.Pin = RTRY_DT_EXTI_Pin|RTRY_CLK_EXTI_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
 
 }
 
