@@ -1,0 +1,10 @@
+#Ignore folder
+.*
+/Drivers/
+/Debug/
+!/.gitignore
+#Ignore files
+notes.txt
+*.ioc
+*.ld
+*.launch
