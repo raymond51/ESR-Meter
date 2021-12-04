@@ -70,10 +70,10 @@ void Error_Handler(void);
 #define SW_OFF_GPIO_Port GPIOA
 #define ANALOG_ON_Pin GPIO_PIN_7
 #define ANALOG_ON_GPIO_Port GPIOA
-#define LED_1_Pin GPIO_PIN_0
-#define LED_1_GPIO_Port GPIOB
-#define LED_2_Pin GPIO_PIN_1
-#define LED_2_GPIO_Port GPIOB
+#define PWR_LED_Pin GPIO_PIN_0
+#define PWR_LED_GPIO_Port GPIOB
+#define STATUS_LED_Pin GPIO_PIN_1
+#define STATUS_LED_GPIO_Port GPIOB
 #define MUX_A0_Pin GPIO_PIN_8
 #define MUX_A0_GPIO_Port GPIOA
 #define MUX_EN_Pin GPIO_PIN_9

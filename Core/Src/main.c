@@ -23,6 +23,10 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include "ssd1306.h"
+#include "ssd1306_tests.h"
+#include <stdbool.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -97,6 +101,11 @@ int main(void)
   MX_I2C1_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
+
+  //Power ON LED
+  HAL_GPIO_WritePin(PWR_LED_GPIO_Port, PWR_LED_Pin, GPIO_PIN_SET); //Initially off
+
+  ssd1306_TestAll();
 
   /* USER CODE END 2 */
 
@@ -328,7 +337,7 @@ static void MX_GPIO_Init(void)
                           |MUX_A0_Pin|MUX_EN_Pin|MUX_A1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LED_1_Pin|LED_2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, PWR_LED_Pin|STATUS_LED_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : BUZZER_Pin BUZZER_VOL_Pin SW_OFF_Pin ANALOG_ON_Pin
                            MUX_A0_Pin MUX_EN_Pin MUX_A1_Pin */
@@ -339,8 +348,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LED_1_Pin LED_2_Pin */
-  GPIO_InitStruct.Pin = LED_1_Pin|LED_2_Pin;
+  /*Configure GPIO pins : PWR_LED_Pin STATUS_LED_Pin */
+  GPIO_InitStruct.Pin = PWR_LED_Pin|STATUS_LED_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
