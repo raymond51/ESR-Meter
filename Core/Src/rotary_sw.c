@@ -15,6 +15,7 @@ states_rtry RotaryStates = IDLE;
 
 static uint32_t tickstart;
 static bool button_transistion_state = false;
+static uint16_t initial_rotation_pin;
 
 /**
 * @brief Determine rotation direction of the rotary switch
@@ -22,14 +23,11 @@ static bool button_transistion_state = false;
 void decode_rotary_sw(uint16_t GPIO_Pin){
 
 #ifdef DEBUG_TEST
-	HAL_GPIO_WritePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin, GPIO_PIN_SET);
+	//HAL_GPIO_WritePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin, GPIO_PIN_SET);
 #endif /* DEBUG */
 
-	if(GPIO_Pin == RTRY_DT_EXTI_Pin){
-
-	} else if(GPIO_Pin == RTRY_CLK_EXTI_Pin){
-
-	}
+	RotaryStates = ROTATION_EVENT;
+	initial_rotation_pin = GPIO_Pin;
 
 }
 
@@ -42,6 +40,7 @@ void decode_rotary_sw_btn(void){
 #ifdef DEBUG_TEST
 	//HAL_GPIO_WritePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin, GPIO_PIN_RESET);
 #endif /* DEBUG */
+
 	RotaryStates = BUTTON_PRESS_EVENT;
 
 }
@@ -75,12 +74,55 @@ void process_rotary_sw(void){
 		RotaryStates = IDLE;
 		break;
 	case ROTATION_EVENT:
-
+		HAL_Delay(DEBOUNCE_DELAY_5MS); //debounce duration
+		if(initial_rotation_pin == RTRY_DT_EXTI_Pin){
+			HAL_Delay(DEBOUNCE_DELAY_10MS); //debounce duration
+			if(HAL_GPIO_ReadPin(RTRY_DT_EXTI_GPIO_Port, RTRY_DT_EXTI_Pin) == HIGH_STATE){
+				//check other line for high
+				if(HAL_GPIO_ReadPin(RTRY_CLK_EXTI_GPIO_Port, RTRY_CLK_EXTI_Pin) == HIGH_STATE){
+					//rotation counter-clockwise
+					HAL_GPIO_WritePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin, GPIO_PIN_RESET);
+				}else{
+					//noise
+					break;
+				}
+			}else{
+				//check other line for low
+				if(HAL_GPIO_ReadPin(RTRY_CLK_EXTI_GPIO_Port, RTRY_CLK_EXTI_Pin) == LOW_STATE){
+					//rotation counter-clockwise
+					HAL_GPIO_WritePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin, GPIO_PIN_RESET);
+				}else{
+					//noise
+					break;
+				}
+			}
+		}else if(initial_rotation_pin == RTRY_CLK_EXTI_Pin){
+			HAL_Delay(DEBOUNCE_DELAY_10MS); //debounce duration
+			if(HAL_GPIO_ReadPin(RTRY_CLK_EXTI_GPIO_Port, RTRY_CLK_EXTI_Pin) == HIGH_STATE){
+				//check other line for high
+				if(HAL_GPIO_ReadPin(RTRY_DT_EXTI_GPIO_Port, RTRY_DT_EXTI_Pin) == HIGH_STATE){
+					//rotation clockwise
+					HAL_GPIO_WritePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin, GPIO_PIN_SET);
+				}else{
+					//noise
+					break;
+				}
+			}else{
+				//check other line for low
+				if(HAL_GPIO_ReadPin(RTRY_DT_EXTI_GPIO_Port, RTRY_DT_EXTI_Pin) == LOW_STATE){
+					//rotation clockwise
+					HAL_GPIO_WritePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin, GPIO_PIN_SET);
+				}else{
+					//noise
+					break;
+				}
+			}
+		}
+		RotaryStates = IDLE;
 		break;
 	default:
 		break;
 	}
 
 }
-
 
