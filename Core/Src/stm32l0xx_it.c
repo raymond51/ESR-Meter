@@ -23,6 +23,7 @@
 #include "stm32l0xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "rotary_sw.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -142,6 +143,20 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief This function handles EXTI line 2 and line 3 interrupts.
+  */
+void EXTI2_3_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI2_3_IRQn 0 */
+
+  /* USER CODE END EXTI2_3_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_3);
+  /* USER CODE BEGIN EXTI2_3_IRQn 1 */
+
+  /* USER CODE END EXTI2_3_IRQn 1 */
+}
+
+/**
   * @brief This function handles EXTI line 4 to 15 interrupts.
   */
 void EXTI4_15_IRQHandler(void)
@@ -181,11 +196,16 @@ void I2C1_IRQHandler(void)
 */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-    if ( GPIO_Pin == GPIO_PIN_4)
+    if ( GPIO_Pin == RTRY_DT_EXTI_Pin || GPIO_Pin == RTRY_CLK_EXTI_Pin)
     {
-	  HAL_GPIO_WritePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin, GPIO_PIN_SET);
+    	decode_rotary_sw(GPIO_Pin);
+    }
+    if ( GPIO_Pin == RTRY_SW_EXTI_Pin)
+    {
+    	decode_rotary_sw_btn();
     }
 }
+
 
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -84,6 +84,7 @@ void Error_Handler(void);
 #define EX_BTN_GPIO_Port GPIOA
 #define RTRY_SW_EXTI_Pin GPIO_PIN_3
 #define RTRY_SW_EXTI_GPIO_Port GPIOB
+#define RTRY_SW_EXTI_EXTI_IRQn EXTI2_3_IRQn
 #define RTRY_DT_EXTI_Pin GPIO_PIN_4
 #define RTRY_DT_EXTI_GPIO_Port GPIOB
 #define RTRY_DT_EXTI_EXTI_IRQn EXTI4_15_IRQn

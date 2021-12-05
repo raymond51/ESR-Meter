@@ -122,6 +122,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  process_rotary_sw();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -372,8 +373,8 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : RTRY_SW_EXTI_Pin */
   GPIO_InitStruct.Pin = RTRY_SW_EXTI_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(RTRY_SW_EXTI_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : RTRY_DT_EXTI_Pin RTRY_CLK_EXTI_Pin */
@@ -383,6 +384,9 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI2_3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI2_3_IRQn);
+
   HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
 
