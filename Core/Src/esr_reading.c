@@ -6,6 +6,9 @@ static ADC_HandleTypeDef hadc;
 static uint32_t adc_ResultDMA;
 static float adc_reading;
 
+/**
+* @brief setup for accurate adc sampling
+*/
 void measure_adc_reading(void){
 
 	enable_analog_power();
@@ -39,3 +42,11 @@ void esr_adc_init(ADC_HandleTypeDef handler){
 	hadc = handler;
 }
 
+/**
+* @brief DMA complete transfer callback
+*/
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+    // Conversion Complete & DMA Transfer Complete As Well
+    // Update with Latest ADC Conversion Result
+}

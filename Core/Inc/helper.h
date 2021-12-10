@@ -3,5 +3,6 @@
 
 #define DEBUG_TEST //Comment out to remove debugging features
 #define VERSION_FIRMWARE 1.0
+#define ESR_IMP_MAX 499
 
 #endif // __HELPER_H__

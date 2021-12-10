@@ -28,6 +28,7 @@
 #include "ssd1306_tests.h"
 #include "display_pages.h"
 #include "esr_reading.h"
+#include "rotary_sw.h"
 
 /* USER CODE END Includes */
 
@@ -108,6 +109,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   // Calibrate The ADC On Power-Up For Better Accuracy
+
   if (HAL_ADCEx_Calibration_Start(&hadc, ADC_SINGLE_ENDED) != HAL_OK)
   {
 	Error_Handler();
@@ -130,7 +132,7 @@ int main(void)
   //ssd1306_TestAll();
   ssd1306_Init();
   ESR_PAGE();
-
+  write_float_to_screen(30.5,0,2,2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
