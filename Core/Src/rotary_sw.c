@@ -59,7 +59,7 @@ void process_rotary_sw(void){
 	case IDLE:
 		break;
 	case BUTTON_PRESS_EVENT:
-		HAL_Delay(DEBOUNCE_DELAY_10MS); //debounce duration
+		HAL_Delay(DEBOUNCE_DELAY_5MS); //debounce duration
 		//noise detect
 		if(HAL_GPIO_ReadPin(RTRY_SW_EXTI_GPIO_Port, RTRY_SW_EXTI_Pin) == LOW_STATE && !button_transistion_state){
 			button_transistion_state = true;

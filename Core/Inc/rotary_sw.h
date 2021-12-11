@@ -12,7 +12,7 @@
 #define LOW_STATE 0
 #define DEBOUNCE_DELAY_5MS 5
 #define DEBOUNCE_DELAY_10MS 10
-#define BUTTON_LONG_PRESS_DURATION 1000 //1s hold
+#define BUTTON_LONG_PRESS_DURATION 1000 //~1s hold
 
 //enums
 typedef enum rotary_sw_states_process
