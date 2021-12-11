@@ -2,6 +2,7 @@
 #define __ESR_READING_H__
 
 //includes
+#include <stdbool.h>
 #include "main.h"
 
 //function prototype

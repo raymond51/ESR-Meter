@@ -125,14 +125,17 @@ int main(void)
   //Power ON LED
   HAL_GPIO_WritePin(PWR_LED_GPIO_Port, PWR_LED_Pin, GPIO_PIN_SET);
 
-  //measurement
+  //init
   esr_adc_init(hadc);
-  measure_adc_reading();
+  ssd1306_Init();
 
   //ssd1306_TestAll();
-  ssd1306_Init();
   ESR_PAGE();
-  write_float_to_screen(30.5,0,2,2);
+
+  //measurement
+  measure_adc_reading();
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -376,20 +379,30 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, BUZZER_Pin|BUZZER_VOL_Pin|SW_OFF_Pin|ANALOG_ON_Pin
-                          |MUX_A0_Pin|MUX_EN_Pin|MUX_A1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, BUZZER_Pin|BUZZER_VOL_Pin|SW_OFF_Pin|MUX_A0_Pin
+                          |MUX_EN_Pin|MUX_A1_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(ANALOG_ON_GPIO_Port, ANALOG_ON_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, PWR_LED_Pin|STATUS_LED_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : BUZZER_Pin BUZZER_VOL_Pin SW_OFF_Pin ANALOG_ON_Pin
-                           MUX_A0_Pin MUX_EN_Pin MUX_A1_Pin */
-  GPIO_InitStruct.Pin = BUZZER_Pin|BUZZER_VOL_Pin|SW_OFF_Pin|ANALOG_ON_Pin
-                          |MUX_A0_Pin|MUX_EN_Pin|MUX_A1_Pin;
+  /*Configure GPIO pins : BUZZER_Pin BUZZER_VOL_Pin SW_OFF_Pin MUX_A0_Pin
+                           MUX_EN_Pin MUX_A1_Pin */
+  GPIO_InitStruct.Pin = BUZZER_Pin|BUZZER_VOL_Pin|SW_OFF_Pin|MUX_A0_Pin
+                          |MUX_EN_Pin|MUX_A1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : ANALOG_ON_Pin */
+  GPIO_InitStruct.Pin = ANALOG_ON_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(ANALOG_ON_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PWR_LED_Pin STATUS_LED_Pin */
   GPIO_InitStruct.Pin = PWR_LED_Pin|STATUS_LED_Pin;

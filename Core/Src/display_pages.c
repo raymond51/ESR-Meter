@@ -60,7 +60,6 @@ void write_float_to_screen(float float_holder, bool is_Large_Font, int x_loc, in
 	char int_part[FLOAT_DISP_PRESCISION]; //Hold integer part of float
 	char decimal_part[FLOAT_DISP_PRESCISION]; //Hold decimal part of float to 1 dp
 
-
 	while(float_holder_x_10)
 	{
 		if(float_holder_x_10>ESR_IMP_MAX){
@@ -79,19 +78,18 @@ void write_float_to_screen(float float_holder, bool is_Large_Font, int x_loc, in
 
 	ssd1306_SetCursor(x_loc, y_loc);
 	if(is_Large_Font){
-	ssd1306_WriteString(int_part, Font_11x18, Black);
-	ssd1306_SetCursor(x_loc+(2*FONT_LARGE_WIDTH), y_loc); //new cursor loc
-	ssd1306_WriteString(".", Font_11x18, Black); // dp
-	ssd1306_SetCursor(x_loc+(3*FONT_LARGE_WIDTH), y_loc);
-	ssd1306_WriteString(decimal_part, Font_11x18, Black);
-
+		ssd1306_WriteString(int_part, Font_11x18, Black);
+		ssd1306_SetCursor(x_loc+(2*FONT_LARGE_WIDTH), y_loc); //new cursor loc
+		ssd1306_WriteString(".", Font_11x18, Black); // dp
+		ssd1306_SetCursor(x_loc+(3*FONT_LARGE_WIDTH), y_loc);
+		ssd1306_WriteString(decimal_part, Font_11x18, Black);
 	}else{
-	ssd1306_SetCursor(x_loc, y_loc);
-	ssd1306_WriteString(int_part, Font_6x8, Black);
-	ssd1306_SetCursor(x_loc+(2*FONT_SMALL_WIDTH), y_loc);
-	ssd1306_WriteString(".", Font_6x8, Black);
-	ssd1306_SetCursor(x_loc+(3*FONT_SMALL_WIDTH), y_loc);
-	ssd1306_WriteString(decimal_part, Font_6x8, Black);
+		ssd1306_SetCursor(x_loc, y_loc);
+		ssd1306_WriteString(int_part, Font_6x8, Black);
+		ssd1306_SetCursor(x_loc+(2*FONT_SMALL_WIDTH), y_loc);
+		ssd1306_WriteString(".", Font_6x8, Black);
+		ssd1306_SetCursor(x_loc+(3*FONT_SMALL_WIDTH), y_loc);
+		ssd1306_WriteString(decimal_part, Font_6x8, Black);
 	}
 	ssd1306_UpdateScreen();
 }

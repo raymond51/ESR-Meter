@@ -1,4 +1,5 @@
 #include "esr_reading.h"
+#include "display_pages.h"
 
 #define ADC_VOLTAGE 3.3
 
@@ -21,21 +22,24 @@ void measure_adc_reading(void){
 	//conversion
 	adc_reading = (adc_ResultDMA*ADC_VOLTAGE/0x0FFF);
 	disable_analog_power();
+	write_float_to_screen(adc_reading*10,false,2,50);
+
 }
 
 /**
 * @brief Enable analog power
 */
 void enable_analog_power(void){
-	HAL_GPIO_WritePin(ANALOG_ON_GPIO_Port, ANALOG_ON_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(ANALOG_ON_GPIO_Port, ANALOG_ON_Pin, GPIO_PIN_RESET);
+	HAL_Delay(10); //Power line settle time
 }
 
 /**
 * @brief Disable analog power
 */
 void disable_analog_power(void){
-	HAL_GPIO_WritePin(ANALOG_ON_GPIO_Port, ANALOG_ON_Pin, GPIO_PIN_RESET);
-	HAL_Delay(20); //Power line settle time
+	HAL_GPIO_WritePin(ANALOG_ON_GPIO_Port, ANALOG_ON_Pin, GPIO_PIN_SET);
+	HAL_Delay(10); //Power line settle time
 }
 
 void esr_adc_init(ADC_HandleTypeDef handler){
