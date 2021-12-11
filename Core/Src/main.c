@@ -140,7 +140,7 @@ int main(void)
   {
 	  process_rotary_sw();
 	  ESR_PAGE();
-	  HAL_Delay(1000);
+	  HAL_Delay(100);
 
     /* USER CODE END WHILE */
 

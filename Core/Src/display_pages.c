@@ -101,17 +101,25 @@ void process_rotary(void){
 
 	if(is_rotaryProcessed()!=true){
 
-		if(get_rotaryState() == ROTATION_EVENT_CLOCKWISE){
-			if(mainNavigation.currPage<1){
-				mainNavigation.currPage = ENUM_PAGE_END - 1;
-			}else{
-				mainNavigation.currPage -= 1;
-			}
-		}else if(get_rotaryState() == ROTATION_EVENT_COUNTER_CLOCKWISE){
-			if(mainNavigation.currPage> (ENUM_PAGE_END - 1)){
-			mainNavigation.currPage = LOGIN;
-			}else{
-				mainNavigation.currPage += 1;
+		if(get_rotaryState() == LONG_BTN_PRESS){
+			mainNavigation.navigation_headerFocus = true;
+		}else if(get_rotaryState() == SHORT_BTN_PRESS){
+			mainNavigation.navigation_headerFocus = false;
+		}
+
+		if(mainNavigation.navigation_headerFocus){
+			if(get_rotaryState() == ROTATION_EVENT_CLOCKWISE){
+				if(mainNavigation.currPage<1){
+					mainNavigation.currPage = ENUM_PAGE_END - 1;
+				}else{
+					mainNavigation.currPage -= 1;
+				}
+			}else if(get_rotaryState() == ROTATION_EVENT_COUNTER_CLOCKWISE){
+				if(mainNavigation.currPage> (ENUM_PAGE_END - 1)){
+				mainNavigation.currPage = LOGIN;
+				}else{
+					mainNavigation.currPage += 1;
+				}
 			}
 		}
 	}
@@ -221,7 +229,12 @@ void draw_navigationBar(void){
 	ssd1306_DrawRectangle(1, 1, SSD1306_WIDTH-1, NAVIGATION_HEADER_HEIGHT , Black);
 	/*Navigation header name*/
 	ssd1306_SetCursor(edge_offset, edge_offset);
-	ssd1306_WriteString(*(mainNavigation.pageTitle+((int)mainNavigation.currPage)-1), Font_6x8, Black);
+
+	if(mainNavigation.navigation_headerFocus){
+		ssd1306_WriteString(*(mainNavigation.pageTitle+((int)mainNavigation.currPage)-1), Font_6x8, White);
+	}else{
+		ssd1306_WriteString(*(mainNavigation.pageTitle+((int)mainNavigation.currPage)-1), Font_6x8, Black);
+	}
 
 	/*Navigation header index*/
 	int temp_index_offset = 100;
