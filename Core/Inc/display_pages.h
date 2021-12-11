@@ -8,5 +8,6 @@ void ESR_PAGE(void);
 void init_ringBuffer(void);
 void input_ringBuffer(char c);
 void write_float_to_screen(float float_holder, bool is_Large_Font, int x_loc, int y_loc);
+void write_int_to_screen(int int_holder, bool is_Large_Font, int x_loc, int y_loc);
 
 #endif // __DISPLAY_PAGES_H__
