@@ -115,7 +115,7 @@ int main(void)
 	Error_Handler();
   }
 
-  //Initialise pins
+  /*Initialise pins*/
   HAL_GPIO_WritePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(PWR_LED_GPIO_Port, PWR_LED_Pin, GPIO_PIN_RESET);
   disable_analog_power();
@@ -125,15 +125,16 @@ int main(void)
   //Power ON LED
   HAL_GPIO_WritePin(PWR_LED_GPIO_Port, PWR_LED_Pin, GPIO_PIN_SET);
 
-  //init
+  /*Init*/
   esr_adc_init(hadc);
   ssd1306_Init();
 
   //ssd1306_TestAll();
-  ESR_PAGE();
+  ESR_welcomePage();
+  //ESR_PAGE();
 
-  //measurement
-  measure_adc_reading();
+  /*Measurement*/
+  //measure_adc_reading();
 
 
   /* USER CODE END 2 */
@@ -143,9 +144,11 @@ int main(void)
   while (1)
   {
 	  //process_rotary_sw();
+	  /*
 	  ssd1306_Fill(White);
 	  measure_adc_reading();
 	  HAL_Delay(1000);
+	  */
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

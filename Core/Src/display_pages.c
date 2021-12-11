@@ -3,12 +3,30 @@
 #include "ssd1306.h"
 #include "helper.h"
 
+
 #define INT_DISPLAY_STORAGE 8
 #define FLOAT_DISP_PRESCISION 4
 #define MOD_FACTOR 10
 #define FONT_SMALL_WIDTH 6
 #define FONT_LARGE_WIDTH 11
 
+typedef enum page_states
+{
+	LOGIN,
+	ESR,
+	SETTINGS,
+	ENUM_END
+
+	/*
+	 * LOGIN,
+	 * ESR
+	 * ESR TABLE
+	 * CALIBRATION
+	 * DEBUG TERMINAL
+	 * SETTINGS
+	 * */
+
+}page_states;
 
 //buffer structure for terminal debug ouput
 #define BUFFER_SIZE 10
@@ -19,7 +37,15 @@ typedef struct
 
 }ringBuffer;
 
+typedef struct
+{
+	char pageTitle[ENUM_END][BUFFER_SIZE];
+	page_states currPage;
+
+}navigationHeader;
+
 static ringBuffer terminalBuf = {{0}, 0}; //fixed size to prevent further memory allocation
+static navigationHeader mainNavigation = {{"LOGIN","ESR","SETTINGS"}, LOGIN}; //fixed size to prevent further memory allocation
 
 /**
 * @brief ring buffer init
@@ -40,13 +66,60 @@ void input_ringBuffer(char c){
 * @brief Render and display page for ESR reading
 */
 void ESR_PAGE(void){
+
+	switch(mainNavigation.currPage){
+	case LOGIN:
+		draw_LoginPage();
+		break;
+	case ESR:
+		break;
+	case SETTINGS:
+		break;
+	case ENUM_END:
+		//loop back to ESR
+		break;
+	default:
+		break;
+	}
+	/*
 	ssd1306_Fill(White);
     ssd1306_SetCursor(2,0);
     ssd1306_WriteString("Testing...", Font_11x18, Black);
     ssd1306_SetCursor(2, 18*2);
     ssd1306_WriteString("Font 6x8", Font_6x8, Black);
     ssd1306_UpdateScreen();
+    */
 }
+
+void ESR_welcomePage(void){
+	uint32_t delta;
+
+	ssd1306_Fill(White);
+
+    ssd1306_SetCursor(16,24);
+    ssd1306_WriteString("ESR METER", Font_11x18, Black);
+
+	for(delta = 0; delta < 3; delta ++) {
+		ssd1306_DrawRectangle(1 + (3*delta),1 + (3*delta) ,SSD1306_WIDTH-1 - (3*delta),SSD1306_HEIGHT-1 - (3*delta), Black);
+	}
+	ssd1306_UpdateScreen();
+
+}
+
+void draw_LoginPage(void){
+
+	ssd1306_Fill(White);
+	draw_navigationBar();
+
+}
+
+void draw_navigationBar(void){
+
+	  ssd1306_UpdateScreen();
+
+
+}
+
 /**
 * @brief Render and display large/small float to screen. Reduced size and resolution float.
 * @PARAM[IN] float_holder : float value to be displayed
