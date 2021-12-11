@@ -9,6 +9,7 @@
 #define MOD_FACTOR 10
 #define FONT_SMALL_WIDTH 6
 #define FONT_LARGE_WIDTH 11
+#define NAVIGATION_HEADER_HEIGHT 14
 
 typedef enum page_states
 {
@@ -41,11 +42,12 @@ typedef struct
 {
 	char pageTitle[ENUM_END][BUFFER_SIZE];
 	page_states currPage;
+	bool navigation_headerFocus;
 
 }navigationHeader;
 
 static ringBuffer terminalBuf = {{0}, 0}; //fixed size to prevent further memory allocation
-static navigationHeader mainNavigation = {{"LOGIN","ESR","SETTINGS"}, LOGIN}; //fixed size to prevent further memory allocation
+static navigationHeader mainNavigation = {{"LOGIN","ESR","SETTINGS"}, LOGIN, false}; //fixed size to prevent further memory allocation
 
 /**
 * @brief ring buffer init
@@ -91,6 +93,9 @@ void ESR_PAGE(void){
     */
 }
 
+/**
+* @brief Render and display splash screen briefly
+*/
 void ESR_welcomePage(void){
 	uint32_t delta;
 
@@ -104,6 +109,9 @@ void ESR_welcomePage(void){
 	}
 	ssd1306_UpdateScreen();
 
+	HAL_Delay(3000);
+	draw_LoginPage();
+
 }
 
 void draw_LoginPage(void){
@@ -115,8 +123,26 @@ void draw_LoginPage(void){
 
 void draw_navigationBar(void){
 
-	  ssd1306_UpdateScreen();
+	char buf[BUFFER_SIZE];
+	const int edge_offset = 4;
 
+	ssd1306_DrawRectangle(1, 1, SSD1306_WIDTH-1, NAVIGATION_HEADER_HEIGHT , Black);
+	/*Navigation header name*/
+	ssd1306_SetCursor(edge_offset, edge_offset);
+	ssd1306_WriteString("LOGIN", Font_6x8, Black);
+
+	/*Navigation header index*/
+	int temp_index_offset = 100;
+	ssd1306_SetCursor(temp_index_offset, edge_offset);
+	snprintf(buf, BUFFER_SIZE, "%d", edge_offset);
+	ssd1306_WriteString(buf, Font_6x8, Black);
+	ssd1306_SetCursor((temp_index_offset+=FONT_SMALL_WIDTH), edge_offset);
+	ssd1306_WriteString("/", Font_6x8, Black);
+	ssd1306_SetCursor((temp_index_offset+=FONT_SMALL_WIDTH), edge_offset);
+	snprintf(buf, BUFFER_SIZE, "%d", 5);
+	ssd1306_WriteString(buf, Font_6x8, Black);
+
+	ssd1306_UpdateScreen();
 
 }
 
