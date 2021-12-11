@@ -131,10 +131,7 @@ int main(void)
 
   //ssd1306_TestAll();
   ESR_welcomePage();
-  //ESR_PAGE();
-
-  /*Measurement*/
-  //measure_adc_reading();
+  ESR_PAGE();
 
 
   /* USER CODE END 2 */

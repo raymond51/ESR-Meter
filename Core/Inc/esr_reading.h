@@ -7,7 +7,7 @@
 
 //function prototype
 void esr_adc_init(ADC_HandleTypeDef handler);
-void measure_adc_reading(void);
+float measure_adc_reading(void);
 void enable_analog_power(void);
 void disable_analog_power(void);
 

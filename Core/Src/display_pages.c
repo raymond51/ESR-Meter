@@ -2,6 +2,7 @@
 
 #include "ssd1306.h"
 #include "helper.h"
+#include "esr_reading.h"
 
 
 #define INT_DISPLAY_STORAGE 8
@@ -13,10 +14,10 @@
 
 typedef enum page_states
 {
-	LOGIN,
+	LOGIN=1,
 	ESR,
 	SETTINGS,
-	ENUM_END
+	ENUM_PAGE_END
 
 	/*
 	 * LOGIN,
@@ -40,15 +41,15 @@ typedef struct
 
 typedef struct
 {
-	char pageTitle[ENUM_END][BUFFER_SIZE];
+	char pageTitle[ENUM_PAGE_END][BUFFER_SIZE];
 	page_states currPage;
 	bool navigation_headerFocus;
 
 }navigationHeader;
 
 static ringBuffer terminalBuf = {{0}, 0}; //fixed size to prevent further memory allocation
-static navigationHeader mainNavigation = {{"LOGIN","ESR","SETTINGS"}, LOGIN, false}; //fixed size to prevent further memory allocation
-
+//static navigationHeader mainNavigation = {{"LOGIN","ESR","SETTINGS"}, LOGIN, false};
+static navigationHeader mainNavigation = {{"LOGIN","ESR","SETTINGS"}, ESR, false};
 /**
 * @brief ring buffer init
 */
@@ -74,10 +75,11 @@ void ESR_PAGE(void){
 		draw_LoginPage();
 		break;
 	case ESR:
+		draw_ESRPage();
 		break;
 	case SETTINGS:
 		break;
-	case ENUM_END:
+	case ENUM_PAGE_END:
 		//loop back to ESR
 		break;
 	default:
@@ -108,9 +110,7 @@ void ESR_welcomePage(void){
 		ssd1306_DrawRectangle(1 + (3*delta),1 + (3*delta) ,SSD1306_WIDTH-1 - (3*delta),SSD1306_HEIGHT-1 - (3*delta), Black);
 	}
 	ssd1306_UpdateScreen();
-
-	HAL_Delay(3000);
-	draw_LoginPage();
+	HAL_Delay(3000);  //display length
 
 }
 
@@ -118,7 +118,22 @@ void draw_LoginPage(void){
 
 	ssd1306_Fill(White);
 	draw_navigationBar();
+	/*Login Logic*/
 
+}
+
+void draw_ESRPage(void){
+
+	ssd1306_Fill(White);
+	draw_navigationBar();
+
+	ssd1306_SetCursor(4, 25);
+	ssd1306_WriteString("READING:", Font_6x8, Black);
+	ssd1306_SetCursor(50, 50);
+	ssd1306_WriteString("OHMS", Font_6x8, Black);
+	//write_float_to_screen(measure_adc_reading(),true,4,40);
+	write_float_to_screen(9999,true,4,40);
+	ssd1306_UpdateScreen();
 }
 
 void draw_navigationBar(void){
@@ -134,12 +149,12 @@ void draw_navigationBar(void){
 	/*Navigation header index*/
 	int temp_index_offset = 100;
 	ssd1306_SetCursor(temp_index_offset, edge_offset);
-	snprintf(buf, BUFFER_SIZE, "%d", edge_offset);
+	snprintf(buf, BUFFER_SIZE, "%d", (int) mainNavigation.currPage);
 	ssd1306_WriteString(buf, Font_6x8, Black);
 	ssd1306_SetCursor((temp_index_offset+=FONT_SMALL_WIDTH), edge_offset);
 	ssd1306_WriteString("/", Font_6x8, Black);
 	ssd1306_SetCursor((temp_index_offset+=FONT_SMALL_WIDTH), edge_offset);
-	snprintf(buf, BUFFER_SIZE, "%d", 5);
+	snprintf(buf, BUFFER_SIZE, "%d", (int) (ENUM_PAGE_END-1));
 	ssd1306_WriteString(buf, Font_6x8, Black);
 
 	ssd1306_UpdateScreen();

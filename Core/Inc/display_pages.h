@@ -8,6 +8,7 @@ void ESR_PAGE(void);
 void ESR_welcomePage(void);
 void draw_navigationBar(void);
 void draw_LoginPage(void);
+void draw_ESRPage(void);
 void init_ringBuffer(void);
 void input_ringBuffer(char c);
 void write_float_to_screen(float float_holder, bool is_Large_Font, int x_loc, int y_loc);

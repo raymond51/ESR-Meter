@@ -12,7 +12,7 @@ static float adc_reading;
 /**
 * @brief setup for accurate adc sampling
 */
-void measure_adc_reading(void){
+float measure_adc_reading(void){
 
 	uint16_t acc_adc_ResultDMA=0;
 
@@ -40,8 +40,8 @@ void measure_adc_reading(void){
 	//adc_reading = (adc_ResultDMA[0]*ADC_VOLTAGE/0x0FFF); //sig before LPF
 	adc_reading = (acc_adc_ResultDMA*ADC_VOLTAGE/0x0FFF);
 	disable_analog_power();
-	//write_float_to_screen(adc_reading*10,false,2,50);
-	write_int_to_screen((int) (adc_reading * 100),false,2,50);
+
+	return adc_reading;
 }
 
 /**
