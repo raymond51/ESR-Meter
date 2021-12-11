@@ -2,6 +2,7 @@
 #include "display_pages.h"
 
 #define ADC_VOLTAGE 3.3
+#define TWENTY_POINT_AVE 20
 
 static ADC_HandleTypeDef hadc;
 static volatile uint16_t adc_ResultDMA[2];
@@ -13,6 +14,8 @@ static float adc_reading;
 */
 void measure_adc_reading(void){
 
+	uint16_t acc_adc_ResultDMA=0;
+
 	enable_analog_power();
 	// ignore initial reading for warm up
 	for(int i=0;i<3;i++){
@@ -22,9 +25,20 @@ void measure_adc_reading(void){
 		adcConversionComplete = 0;
 	}
 
+	//20 point averaging
+	for(int i=0;i<TWENTY_POINT_AVE;i++){
+			//while (HAL_ADC_Start_DMA(&hadc, (uint32_t*) adc_ResultDMA, 2) != HAL_OK){}
+			HAL_ADC_Start_DMA(&hadc, (uint32_t*) adc_ResultDMA, 2);
+			while(adcConversionComplete == 0){}
+			adcConversionComplete = 0;
+			acc_adc_ResultDMA += adc_ResultDMA[1];
+	}
+
+	acc_adc_ResultDMA /= TWENTY_POINT_AVE;
+
 	/*conversion*/
 	//adc_reading = (adc_ResultDMA[0]*ADC_VOLTAGE/0x0FFF); //sig before LPF
-	adc_reading = (adc_ResultDMA[1]*ADC_VOLTAGE/0x0FFF);
+	adc_reading = (acc_adc_ResultDMA*ADC_VOLTAGE/0x0FFF);
 	disable_analog_power();
 	//write_float_to_screen(adc_reading*10,false,2,50);
 	write_int_to_screen((int) (adc_reading * 100),false,2,50);
