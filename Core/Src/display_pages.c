@@ -9,6 +9,7 @@
 #define FLOAT_DISP_PRESCISION 4
 #define MOD_FACTOR 10
 #define FONT_SMALL_WIDTH 6
+#define FONT_SMALL_HEIGHT 8
 #define FONT_LARGE_WIDTH 11
 #define NAVIGATION_HEADER_HEIGHT 14
 
@@ -127,12 +128,23 @@ void draw_ESRPage(void){
 	ssd1306_Fill(White);
 	draw_navigationBar();
 
+	/*Reading display*/
 	ssd1306_SetCursor(4, 25);
 	ssd1306_WriteString("READING:", Font_6x8, Black);
 	ssd1306_SetCursor(50, 50);
-	ssd1306_WriteString("OHMS", Font_6x8, Black);
+	ssd1306_WriteString("OHM", Font_6x8, Black);
 	//write_float_to_screen(measure_adc_reading(),true,4,40);
 	write_float_to_screen(9999,true,4,40);
+
+	/*Modes Display*/
+	int temp_mode_offset = 25;
+	ssd1306_SetCursor(80, temp_mode_offset);
+	ssd1306_WriteString("MODE:", Font_6x8, Black);
+	ssd1306_SetCursor(90, (temp_mode_offset+=FONT_SMALL_HEIGHT));
+	ssd1306_WriteString("CONT.", Font_6x8, White);
+	ssd1306_SetCursor(90, (temp_mode_offset+=FONT_SMALL_HEIGHT));
+	ssd1306_WriteString("HOLD", Font_6x8, Black);
+
 	ssd1306_UpdateScreen();
 }
 
@@ -144,7 +156,7 @@ void draw_navigationBar(void){
 	ssd1306_DrawRectangle(1, 1, SSD1306_WIDTH-1, NAVIGATION_HEADER_HEIGHT , Black);
 	/*Navigation header name*/
 	ssd1306_SetCursor(edge_offset, edge_offset);
-	ssd1306_WriteString("LOGIN", Font_6x8, Black);
+	ssd1306_WriteString(*(mainNavigation.pageTitle+((int)mainNavigation.currPage)-1), Font_6x8, Black);
 
 	/*Navigation header index*/
 	int temp_index_offset = 100;
