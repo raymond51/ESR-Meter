@@ -39,11 +39,12 @@ typedef struct
 	char pageTitle[ENUM_PAGE_END][2*BUFFER_SIZE];
 	page_states currPage;
 	bool navigation_headerFocus;
+	bool is_loginSuccessful;
 
 }navigationHeader;
 
 static ringBuffer terminalBuf = {{0}, 0}; //fixed size to prevent further memory allocation
-static navigationHeader mainNavigation = {{"LOGIN","ESR", "ESR TABLE","CALIBRATION", "TERMINAL","SETTINGS"}, LOGIN, false};
+static navigationHeader mainNavigation = {{"LOGIN","ESR", "ESR TABLE","CALIBRATION", "TERMINAL","SETTINGS"}, LOGIN, false, true};
 /**
 * @brief ring buffer init
 */
@@ -64,28 +65,7 @@ void input_ringBuffer(char c){
 */
 void ESR_PAGE(void){
 
-	if(is_rotaryProcessed()!=true){
-		/*
-		if(get_rotaryState() == SHORT_BTN_PRESS){
-		mainNavigation.currPage = LOGIN;
-		}else if(get_rotaryState() == LONG_BTN_PRESS){
-		mainNavigation.currPage = SETTINGS;
-		}
-		*/
-		if(get_rotaryState() == ROTATION_EVENT_CLOCKWISE){
-			if(mainNavigation.currPage<1){
-				mainNavigation.currPage = ENUM_PAGE_END - 1;
-			}else{
-				mainNavigation.currPage -= 1;
-			}
-		}else if(get_rotaryState() == ROTATION_EVENT_COUNTER_CLOCKWISE){
-			if(mainNavigation.currPage> (ENUM_PAGE_END - 1)){
-			mainNavigation.currPage = LOGIN;
-			}else{
-				mainNavigation.currPage += 1;
-			}
-		}
-	}
+	process_rotary();
 
 	switch(mainNavigation.currPage){
 	case LOGIN:
@@ -117,6 +97,26 @@ void ESR_PAGE(void){
 
 }
 
+void process_rotary(void){
+
+	if(is_rotaryProcessed()!=true){
+
+		if(get_rotaryState() == ROTATION_EVENT_CLOCKWISE){
+			if(mainNavigation.currPage<1){
+				mainNavigation.currPage = ENUM_PAGE_END - 1;
+			}else{
+				mainNavigation.currPage -= 1;
+			}
+		}else if(get_rotaryState() == ROTATION_EVENT_COUNTER_CLOCKWISE){
+			if(mainNavigation.currPage> (ENUM_PAGE_END - 1)){
+			mainNavigation.currPage = LOGIN;
+			}else{
+				mainNavigation.currPage += 1;
+			}
+		}
+	}
+}
+
 /**
 * @brief Render and display splash screen briefly
 */
@@ -142,12 +142,24 @@ void draw_LoginPage(void){
 	draw_navigationBar();
 
 	/*Display Firmware Version*/
+	/*
 	int temp_firm_offset = 80;
 	ssd1306_SetCursor(temp_firm_offset, 55);
 	ssd1306_WriteString("VER:", Font_6x8, Black);
 	write_float_to_screen(VERSION_FIRMWARE,false,temp_firm_offset += (4*FONT_SMALL_WIDTH),55);
+	 */
 
 	/*Login Logic*/
+	int temp_login_offset = 20;
+	ssd1306_SetCursor(30, temp_login_offset);
+	ssd1306_WriteString("USER:", Font_6x8, Black);
+	ssd1306_SetCursor(30, temp_login_offset += FONT_SMALL_HEIGHT);
+	ssd1306_WriteString("PASS:", Font_6x8, Black);
+	ssd1306_SetCursor(15, temp_login_offset += (2*FONT_SMALL_HEIGHT));
+	ssd1306_WriteString("LOGIN", Font_6x8, Black);
+	ssd1306_SetCursor(65, temp_login_offset);
+	ssd1306_WriteString("REGISTER", Font_6x8, Black);
+	ssd1306_UpdateScreen();
 
 }
 
@@ -198,6 +210,7 @@ void draw_SettingPage(void){
 	ssd1306_Fill(White);
 	draw_navigationBar();
 	/*Setting Page*/
+
 }
 
 void draw_navigationBar(void){

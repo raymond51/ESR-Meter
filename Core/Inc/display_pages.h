@@ -6,6 +6,7 @@
 
 void ESR_PAGE(void);
 void ESR_welcomePage(void);
+void process_rotary(void);
 void draw_navigationBar(void);
 void draw_LoginPage(void);
 void draw_ESRPage(void);

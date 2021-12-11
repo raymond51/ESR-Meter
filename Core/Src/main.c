@@ -129,10 +129,8 @@ int main(void)
   esr_adc_init(hadc);
   ssd1306_Init();
 
-  ssd1306_TestAll();
+  //ssd1306_TestAll();
   ESR_welcomePage();
-  ESR_PAGE();
-
 
   /* USER CODE END 2 */
 
@@ -142,7 +140,7 @@ int main(void)
   {
 	  process_rotary_sw();
 	  ESR_PAGE();
-	  HAL_Delay(100);
+	  HAL_Delay(1000);
 
     /* USER CODE END WHILE */
 
