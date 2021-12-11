@@ -34,10 +34,6 @@ static uint16_t initial_rotation_pin;
 */
 void decode_rotary_sw(uint16_t GPIO_Pin){
 
-#ifdef DEBUG_TEST
-	//HAL_GPIO_WritePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin, GPIO_PIN_SET);
-#endif /* DEBUG */
-
 	RotaryStates = ROTATION_EVENT;
 	initial_rotation_pin = GPIO_Pin;
 
@@ -47,11 +43,6 @@ void decode_rotary_sw(uint16_t GPIO_Pin){
 * @brief Handle the button on the rotary switch, determines if press is short/long
 */
 void decode_rotary_sw_btn(void){
-
-
-#ifdef DEBUG_TEST
-	//HAL_GPIO_WritePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin, GPIO_PIN_RESET);
-#endif /* DEBUG */
 
 	RotaryStates = BUTTON_PRESS_EVENT;
 
@@ -77,13 +68,15 @@ void process_rotary_sw(void){
 			button_transistion_state = false;
 			elapsed_time = HAL_GetTick() - tickstart;
 			if(elapsed_time > BUTTON_LONG_PRESS_DURATION){
-				rotary_struct.currState = LONG_BTN_PRESS; //long press
-				rotary_struct.flag_processed = false;
+				set_rotaryState(LONG_BTN_PRESS); //long press
+#ifdef DEBUG_TEST
 				HAL_GPIO_WritePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin, GPIO_PIN_RESET);
+#endif /* DEBUG */
 			}else{
+				set_rotaryState(SHORT_BTN_PRESS); //short press
+#ifdef DEBUG_TEST
 				HAL_GPIO_WritePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin, GPIO_PIN_SET);
-				rotary_struct.currState = SHORT_BTN_PRESS; //short press
-				rotary_struct.flag_processed = false;
+#endif /* DEBUG */
 			}
 		}else{button_transistion_state = false;}
 		RotaryStates = IDLE;
@@ -95,9 +88,10 @@ void process_rotary_sw(void){
 			if(HAL_GPIO_ReadPin(RTRY_DT_EXTI_GPIO_Port, RTRY_DT_EXTI_Pin) == HIGH_STATE){
 				//check other line for high
 				if(HAL_GPIO_ReadPin(RTRY_CLK_EXTI_GPIO_Port, RTRY_CLK_EXTI_Pin) == HIGH_STATE){
-					rotary_struct.currState = ROTATION_EVENT_COUNTER_CLOCKWISE; //rotation counter-clockwise
-					rotary_struct.flag_processed = false;
+					set_rotaryState(ROTATION_EVENT_COUNTER_CLOCKWISE); //rotation counter-clockwise
+#ifdef DEBUG_TEST
 					HAL_GPIO_WritePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin, GPIO_PIN_RESET);
+#endif /* DEBUG */
 				}else{
 					//noise
 					break;
@@ -105,9 +99,10 @@ void process_rotary_sw(void){
 			}else{
 				//check other line for low
 				if(HAL_GPIO_ReadPin(RTRY_CLK_EXTI_GPIO_Port, RTRY_CLK_EXTI_Pin) == LOW_STATE){
-					rotary_struct.currState = ROTATION_EVENT_COUNTER_CLOCKWISE; //rotation counter-clockwise
-					rotary_struct.flag_processed = false;
+					set_rotaryState(ROTATION_EVENT_COUNTER_CLOCKWISE); //rotation counter-clockwise
+#ifdef DEBUG_TEST
 					HAL_GPIO_WritePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin, GPIO_PIN_RESET);
+#endif /* DEBUG */
 				}else{
 					//noise
 					break;
@@ -118,9 +113,10 @@ void process_rotary_sw(void){
 			if(HAL_GPIO_ReadPin(RTRY_CLK_EXTI_GPIO_Port, RTRY_CLK_EXTI_Pin) == HIGH_STATE){
 				//check other line for high
 				if(HAL_GPIO_ReadPin(RTRY_DT_EXTI_GPIO_Port, RTRY_DT_EXTI_Pin) == HIGH_STATE){
-					rotary_struct.currState = ROTATION_EVENT_CLOCKWISE; //rotation clockwise
-					rotary_struct.flag_processed = false;
+					set_rotaryState(ROTATION_EVENT_CLOCKWISE); //rotation clockwise
+#ifdef DEBUG_TEST
 					HAL_GPIO_WritePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin, GPIO_PIN_SET);
+#endif /* DEBUG */
 				}else{
 					//noise
 					break;
@@ -128,9 +124,11 @@ void process_rotary_sw(void){
 			}else{
 				//check other line for low
 				if(HAL_GPIO_ReadPin(RTRY_DT_EXTI_GPIO_Port, RTRY_DT_EXTI_Pin) == LOW_STATE){
-					rotary_struct.currState = ROTATION_EVENT_CLOCKWISE; //rotation clockwise
-					rotary_struct.flag_processed = false;
+					set_rotaryState(ROTATION_EVENT_CLOCKWISE); //rotation clockwise
+#ifdef DEBUG_TEST
 					HAL_GPIO_WritePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin, GPIO_PIN_SET);
+#endif /* DEBUG */
+
 				}else{
 					//noise
 					break;
@@ -151,6 +149,11 @@ bool is_rotaryProcessed(void){
 
 int get_rotaryState(void){
 	return (int) rotary_struct.currState;
+}
+
+void set_rotaryState(states_rtry_process type){
+	rotary_struct.currState = type;
+	rotary_struct.flag_processed = false;
 }
 
 void reset_rotaryStatus(void){
