@@ -182,7 +182,7 @@ void draw_ESRPage(void){
 	ssd1306_SetCursor(60, 50);
 	ssd1306_WriteString("OHM", Font_6x8, Black);
 	//write_float_to_screen(measure_adc_reading(),true,4,40);
-	write_float_to_screen(9999,true,4,40);
+	write_float_to_screen(0.54,true,4,40);
 
 	/*Modes Display*/
 	int temp_mode_offset = 25;
@@ -260,44 +260,81 @@ void draw_navigationBar(void){
 */
 void write_float_to_screen(float float_holder, bool is_Large_Font, int x_loc, int y_loc){
 
-	const int three_sf = 99;
-	int float_holder_x_100 = (int) (float_holder * 10); //multiply float first before conversion to int for processing
-	char int_part[FLOAT_DISP_PRESCISION]; //Hold integer part of float
+	const int three_sf = 999, two_sf = 99, one_sf = 9, one_digit = 1;
+	int float_holder_x_100 = (int) (float_holder * 100); //multiply float first before conversion to int for processing
+	int float_holder_x_100_padding = float_holder_x_100;
+	char int_part_msb[FLOAT_DISP_PRESCISION]; //Hold integer part of float
+	char int_part_lsb[FLOAT_DISP_PRESCISION]; //Hold integer part of float
 	char decimal_part_msb[FLOAT_DISP_PRESCISION]; //Hold decimal part of float left point
 	char decimal_part_lsb[FLOAT_DISP_PRESCISION]; //Hold decimal part of float right point
 
+	/*Val retrieval*/
 	while(float_holder_x_100)
 	{
-		if(float_holder_x_100>ESR_IMP_MAX){
+		if(float_holder_x_100>=ESR_IMP_MAX){
 			/*Display MAX value for float*/
-			snprintf(int_part, FLOAT_DISP_PRESCISION, "%d", ESR_IMP_MAX/100);
+			snprintf(int_part_msb, FLOAT_DISP_PRESCISION, "%d", ESR_IMP_MAX/100);
+			snprintf(int_part_lsb, FLOAT_DISP_PRESCISION, "%d", ESR_IMP_MAX % MOD_FACTOR);
 			snprintf(decimal_part_msb, FLOAT_DISP_PRESCISION, "%d", ESR_IMP_MAX % MOD_FACTOR);
 			snprintf(decimal_part_lsb, FLOAT_DISP_PRESCISION, "%d", ESR_IMP_MAX % MOD_FACTOR);
 			break;
-		}else if(float_holder_x_100<ESR_IMP_MIN){
-			snprintf(int_part, FLOAT_DISP_PRESCISION, "%s", "00"); //represent 0
-			snprintf(decimal_part_msb, FLOAT_DISP_PRESCISION, "%d", 0);
+		}else if(float_holder_x_100>=three_sf && float_holder_x_100<ESR_IMP_MAX){
+			//decimal lsb
+			snprintf(decimal_part_lsb, FLOAT_DISP_PRESCISION, "%d", float_holder_x_100 % MOD_FACTOR);
+		}else if(float_holder_x_100>=two_sf && float_holder_x_100<three_sf){
+			//decimal msb
+			snprintf(decimal_part_msb, FLOAT_DISP_PRESCISION, "%d", float_holder_x_100 % MOD_FACTOR);
+		}else if(float_holder_x_100>=one_sf && float_holder_x_100<two_sf){
+			//integer lsb
+			snprintf(int_part_lsb, FLOAT_DISP_PRESCISION, "%d", float_holder_x_100 % MOD_FACTOR);
+		}else if(float_holder_x_100>=one_digit && float_holder_x_100<one_sf){
+			//integer msb
+			snprintf(int_part_msb, FLOAT_DISP_PRESCISION, "%d", float_holder_x_100 % MOD_FACTOR);
+		}else if(float_holder_x_100<one_digit){
+			//exit on zero
 			break;
-		}else if(float_holder_x_100>three_sf){
-	    	snprintf(decimal_part_msb, FLOAT_DISP_PRESCISION, "%d", float_holder_x_100 % MOD_FACTOR);
-	    }else{
-			snprintf(int_part, FLOAT_DISP_PRESCISION, "%d", float_holder_x_100);
-			break;
-	    }
+		}
+
 		float_holder_x_100 /= 10;
 	}
 
+	/*Padding*/
+
+		if(float_holder_x_100_padding>=two_sf && float_holder_x_100_padding<three_sf){
+			//0X.XX
+			snprintf(int_part_msb, FLOAT_DISP_PRESCISION, "%s", "0"); //represent 0
+		}else if(float_holder_x_100_padding>=one_sf && float_holder_x_100_padding<two_sf){
+			//00.XX
+			snprintf(int_part_msb, FLOAT_DISP_PRESCISION, "%s", "0"); //represent 0
+			snprintf(int_part_lsb, FLOAT_DISP_PRESCISION, "%s", "0"); //represent 0
+		}else if(float_holder_x_100_padding>=one_digit && float_holder_x_100_padding<one_sf){
+			//00.0X
+			snprintf(int_part_msb, FLOAT_DISP_PRESCISION, "%s", "0"); //represent 0
+			snprintf(int_part_lsb, FLOAT_DISP_PRESCISION, "%s", "0"); //represent 0
+			snprintf(decimal_part_msb, FLOAT_DISP_PRESCISION, "%s", "0"); //represent 0
+		}else if(float_holder_x_100_padding<one_digit){
+			//zero
+			snprintf(int_part_msb, FLOAT_DISP_PRESCISION, "%s", "0"); //represent 0
+			snprintf(int_part_lsb, FLOAT_DISP_PRESCISION, "%s", "0"); //represent 0
+			snprintf(decimal_part_msb, FLOAT_DISP_PRESCISION, "%s", "0"); //represent 0
+			snprintf(decimal_part_lsb, FLOAT_DISP_PRESCISION, "%s", "0"); //represent 0
+		}
+
 	ssd1306_SetCursor(x_loc, y_loc);
 	if(is_Large_Font){
-		ssd1306_WriteString(int_part, Font_11x18, Black);
-		ssd1306_SetCursor(x_loc+(2*FONT_LARGE_WIDTH), y_loc); //new cursor loc
+		ssd1306_WriteString(int_part_msb, Font_11x18, Black);
+		ssd1306_SetCursor(x_loc+FONT_LARGE_WIDTH, y_loc); //new cursor loc
+		ssd1306_WriteString(int_part_lsb, Font_11x18, Black);
+		ssd1306_SetCursor(x_loc+(2*FONT_LARGE_WIDTH), y_loc);
 		ssd1306_WriteString(".", Font_11x18, Black); // dp
 		ssd1306_SetCursor(x_loc+(3*FONT_LARGE_WIDTH), y_loc);
 		ssd1306_WriteString(decimal_part_msb, Font_11x18, Black);
 		ssd1306_SetCursor(x_loc+(4*FONT_LARGE_WIDTH), y_loc);
 		ssd1306_WriteString(decimal_part_lsb, Font_11x18, Black);
 	}else{
-		ssd1306_WriteString(int_part, Font_6x8, Black);
+		ssd1306_WriteString(int_part_msb, Font_11x18, Black);
+		ssd1306_SetCursor(x_loc+FONT_SMALL_WIDTH, y_loc);
+		ssd1306_WriteString(int_part_lsb, Font_11x18, Black);
 		ssd1306_SetCursor(x_loc+(2*FONT_SMALL_WIDTH), y_loc);
 		ssd1306_WriteString(".", Font_6x8, Black);
 		ssd1306_SetCursor(x_loc+(3*FONT_SMALL_WIDTH), y_loc);
