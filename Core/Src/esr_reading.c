@@ -12,7 +12,7 @@ static float adc_reading;
 */
 void measure_adc_reading(void){
 
-	enable_analog_power();
+	//enable_analog_power();
 	// ignore initial reading for warm up
 	for(int i=0;i<3;i++){
 		while (HAL_ADC_Start_DMA(&hadc, &adc_ResultDMA, 1) != HAL_OK){
@@ -21,7 +21,7 @@ void measure_adc_reading(void){
 
 	//conversion
 	adc_reading = (adc_ResultDMA*ADC_VOLTAGE/0x0FFF);
-	disable_analog_power();
+	//disable_analog_power();
 	write_float_to_screen(adc_reading*10,false,2,50);
 
 }

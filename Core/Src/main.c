@@ -142,7 +142,10 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  process_rotary_sw();
+	  //process_rotary_sw();
+	  ssd1306_Fill(White);
+	  measure_adc_reading();
+	  HAL_Delay(1000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

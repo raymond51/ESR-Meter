@@ -67,11 +67,15 @@ void write_float_to_screen(float float_holder, bool is_Large_Font, int x_loc, in
 			snprintf(int_part, FLOAT_DISP_PRESCISION, "%d", ESR_IMP_MAX/10);
 			snprintf(decimal_part, FLOAT_DISP_PRESCISION, "%d", ESR_IMP_MAX % MOD_FACTOR);
 			break;
+		}else if(float_holder_x_10<ESR_IMP_MIN){
+			snprintf(int_part, FLOAT_DISP_PRESCISION, "%s", "00"); //represent 0
+			snprintf(decimal_part, FLOAT_DISP_PRESCISION, "%d", 0);
+			break;
 		}else if(float_holder_x_10>three_sf){
 	    	snprintf(decimal_part, FLOAT_DISP_PRESCISION, "%d", float_holder_x_10 % MOD_FACTOR);
 	    }else{
-	    	snprintf(int_part, FLOAT_DISP_PRESCISION, "%d", float_holder_x_10);
-	    	break;
+			snprintf(int_part, FLOAT_DISP_PRESCISION, "%d", float_holder_x_10);
+			break;
 	    }
 		float_holder_x_10 /= 10;
 	}
