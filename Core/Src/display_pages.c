@@ -3,7 +3,7 @@
 #include "ssd1306.h"
 #include "helper.h"
 #include "esr_reading.h"
-
+#include "rotary_sw.h"
 
 #define INT_DISPLAY_STORAGE 8
 #define FLOAT_DISP_PRESCISION 4
@@ -17,17 +17,11 @@ typedef enum page_states
 {
 	LOGIN=1,
 	ESR,
+	ESR_TABLE,
+	CALIBRATION,
+	HISTORY_TERMINAL,
 	SETTINGS,
 	ENUM_PAGE_END
-
-	/*
-	 * LOGIN,
-	 * ESR
-	 * ESR TABLE
-	 * CALIBRATION
-	 * DEBUG TERMINAL
-	 * SETTINGS
-	 * */
 
 }page_states;
 
@@ -42,15 +36,14 @@ typedef struct
 
 typedef struct
 {
-	char pageTitle[ENUM_PAGE_END][BUFFER_SIZE];
+	char pageTitle[ENUM_PAGE_END][2*BUFFER_SIZE];
 	page_states currPage;
 	bool navigation_headerFocus;
 
 }navigationHeader;
 
 static ringBuffer terminalBuf = {{0}, 0}; //fixed size to prevent further memory allocation
-//static navigationHeader mainNavigation = {{"LOGIN","ESR","SETTINGS"}, LOGIN, false};
-static navigationHeader mainNavigation = {{"LOGIN","ESR","SETTINGS"}, ESR, false};
+static navigationHeader mainNavigation = {{"LOGIN","ESR", "ESR TABLE","CALIBRATION", "TERMINAL","SETTINGS"}, LOGIN, false};
 /**
 * @brief ring buffer init
 */
@@ -71,6 +64,29 @@ void input_ringBuffer(char c){
 */
 void ESR_PAGE(void){
 
+	if(is_rotaryProcessed()!=true){
+		/*
+		if(get_rotaryState() == SHORT_BTN_PRESS){
+		mainNavigation.currPage = LOGIN;
+		}else if(get_rotaryState() == LONG_BTN_PRESS){
+		mainNavigation.currPage = SETTINGS;
+		}
+		*/
+		if(get_rotaryState() == ROTATION_EVENT_CLOCKWISE){
+			if(mainNavigation.currPage<1){
+				mainNavigation.currPage = ENUM_PAGE_END - 1;
+			}else{
+				mainNavigation.currPage -= 1;
+			}
+		}else if(get_rotaryState() == ROTATION_EVENT_COUNTER_CLOCKWISE){
+			if(mainNavigation.currPage> (ENUM_PAGE_END - 1)){
+			mainNavigation.currPage = LOGIN;
+			}else{
+				mainNavigation.currPage += 1;
+			}
+		}
+	}
+
 	switch(mainNavigation.currPage){
 	case LOGIN:
 		draw_LoginPage();
@@ -78,7 +94,17 @@ void ESR_PAGE(void){
 	case ESR:
 		draw_ESRPage();
 		break;
+	case ESR_TABLE:
+		draw_ESRTable();
+		break;
+	case CALIBRATION:
+		draw_CalibrationPage();
+		break;
+	case HISTORY_TERMINAL:
+		draw_HistoryTerminal();
+		break;
 	case SETTINGS:
+		draw_SettingPage();
 		break;
 	case ENUM_PAGE_END:
 		//loop back to ESR
@@ -86,14 +112,9 @@ void ESR_PAGE(void){
 	default:
 		break;
 	}
-	/*
-	ssd1306_Fill(White);
-    ssd1306_SetCursor(2,0);
-    ssd1306_WriteString("Testing...", Font_11x18, Black);
-    ssd1306_SetCursor(2, 18*2);
-    ssd1306_WriteString("Font 6x8", Font_6x8, Black);
-    ssd1306_UpdateScreen();
-    */
+
+	reset_rotaryStatus();
+
 }
 
 /**
@@ -119,6 +140,13 @@ void draw_LoginPage(void){
 
 	ssd1306_Fill(White);
 	draw_navigationBar();
+
+	/*Display Firmware Version*/
+	int temp_firm_offset = 80;
+	ssd1306_SetCursor(temp_firm_offset, 55);
+	ssd1306_WriteString("VER:", Font_6x8, Black);
+	write_float_to_screen(VERSION_FIRMWARE,false,temp_firm_offset += (4*FONT_SMALL_WIDTH),55);
+
 	/*Login Logic*/
 
 }
@@ -146,6 +174,30 @@ void draw_ESRPage(void){
 	ssd1306_WriteString("HOLD", Font_6x8, Black);
 
 	ssd1306_UpdateScreen();
+}
+
+void draw_ESRTable(void){
+	ssd1306_Fill(White);
+	draw_navigationBar();
+	/*ESR table*/
+}
+
+void draw_CalibrationPage(void){
+	ssd1306_Fill(White);
+	draw_navigationBar();
+	/*Calibration Page*/
+}
+
+void draw_HistoryTerminal(void){
+	ssd1306_Fill(White);
+	draw_navigationBar();
+	/*History Page*/
+}
+
+void draw_SettingPage(void){
+	ssd1306_Fill(White);
+	draw_navigationBar();
+	/*Setting Page*/
 }
 
 void draw_navigationBar(void){
