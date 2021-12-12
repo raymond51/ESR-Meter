@@ -126,8 +126,9 @@ int main(void)
   HAL_GPIO_WritePin(PWR_LED_GPIO_Port, PWR_LED_Pin, GPIO_PIN_SET);
 
   /*Init*/
-  esr_adc_init(hadc);
+  ESR_INIT();
   ssd1306_Init();
+  esr_adc_init(hadc);
 
   //ssd1306_TestAll();
   ESR_welcomePage();

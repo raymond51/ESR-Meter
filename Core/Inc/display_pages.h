@@ -4,7 +4,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+void ESR_INIT(void);
 void ESR_PAGE(void);
+void ESR_init_esr_table(void);
 void ESR_welcomePage(void);
 void process_rotary(void);
 void draw_navigationBar(void);

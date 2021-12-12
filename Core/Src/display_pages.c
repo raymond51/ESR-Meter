@@ -43,8 +43,20 @@ typedef struct
 
 }navigationHeader;
 
+#define VOLT_HOLD 4
+#define CAP_HOLD 8
+
+typedef struct
+{
+	int cap_param_volt[VOLT_HOLD];
+	float cap_param_cap[CAP_HOLD];
+	float cap_imp_data[CAP_HOLD][VOLT_HOLD];
+}esrTable;
+
 static ringBuffer terminalBuf = {{0}, 0}; //fixed size to prevent further memory allocation
 static navigationHeader mainNavigation = {{"LOGIN","ESR", "ESR TABLE","CALIBRATION", "TERMINAL","SETTINGS"}, LOGIN, false, true};
+static esrTable esr_Table;
+
 /**
 * @brief ring buffer init
 */
@@ -58,6 +70,14 @@ void init_ringBuffer(void){
 void input_ringBuffer(char c){
 //check for end of buffer to wrap around
 
+}
+
+/**
+* @brief init function
+*/
+
+void ESR_INIT(void){
+	ESR_init_esr_table();
 }
 
 /**
@@ -125,6 +145,13 @@ void process_rotary(void){
 	}
 }
 
+void ESR_init_esr_table(void){
+	esrTable esr_Table_holder = {{10,16,25,35}, {4.7,10,22,47,100,220,470,1000},
+			{{40,35,29,24},{20,16,14,11},{9,7.5,6.2,5.1},{4.2,3.5,2.9,2.4},{2,1.6,1.4,1.1},{0.9,0.75,0.62,0.51},{0.42,0.35,0.29,0.24},{0.2,0.16,0.14,0.11}}};
+
+	esr_Table = esr_Table_holder;
+}
+
 /**
 * @brief Render and display splash screen briefly
 */
@@ -182,7 +209,7 @@ void draw_ESRPage(void){
 	ssd1306_SetCursor(60, 50);
 	ssd1306_WriteString("OHM", Font_6x8, Black);
 	//write_float_to_screen(measure_adc_reading(),true,4,40);
-	write_float_to_screen(0.004,true,4,40);
+	write_float_to_screen(esr_Table.cap_imp_data[0][1],true,4,40);
 
 	/*Modes Display*/
 	int temp_mode_offset = 25;
@@ -200,6 +227,7 @@ void draw_ESRTable(void){
 	ssd1306_Fill(White);
 	draw_navigationBar();
 	/*ESR table*/
+
 }
 
 void draw_CalibrationPage(void){
