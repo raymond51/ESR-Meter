@@ -182,7 +182,7 @@ void draw_ESRPage(void){
 	ssd1306_SetCursor(60, 50);
 	ssd1306_WriteString("OHM", Font_6x8, Black);
 	//write_float_to_screen(measure_adc_reading(),true,4,40);
-	write_float_to_screen(0.54,true,4,40);
+	write_float_to_screen(0.004,true,4,40);
 
 	/*Modes Display*/
 	int temp_mode_offset = 25;
@@ -279,17 +279,35 @@ void write_float_to_screen(float float_holder, bool is_Large_Font, int x_loc, in
 			snprintf(decimal_part_lsb, FLOAT_DISP_PRESCISION, "%d", ESR_IMP_MAX % MOD_FACTOR);
 			break;
 		}else if(float_holder_x_100>=three_sf && float_holder_x_100<ESR_IMP_MAX){
-			//decimal lsb
-			snprintf(decimal_part_lsb, FLOAT_DISP_PRESCISION, "%d", float_holder_x_100 % MOD_FACTOR);
+			snprintf(decimal_part_lsb, FLOAT_DISP_PRESCISION, "%d", float_holder_x_100 % MOD_FACTOR);//decimal lsb
 		}else if(float_holder_x_100>=two_sf && float_holder_x_100<three_sf){
-			//decimal msb
-			snprintf(decimal_part_msb, FLOAT_DISP_PRESCISION, "%d", float_holder_x_100 % MOD_FACTOR);
+			if(float_holder_x_100_padding>three_sf){
+				snprintf(decimal_part_msb, FLOAT_DISP_PRESCISION, "%d", float_holder_x_100 % MOD_FACTOR);
+			}else if(float_holder_x_100_padding>two_sf && float_holder_x_100_padding<=three_sf){
+				snprintf(decimal_part_lsb, FLOAT_DISP_PRESCISION, "%d", float_holder_x_100 % MOD_FACTOR); //decimal lsb
+			}
 		}else if(float_holder_x_100>=one_sf && float_holder_x_100<two_sf){
-			//integer lsb
-			snprintf(int_part_lsb, FLOAT_DISP_PRESCISION, "%d", float_holder_x_100 % MOD_FACTOR);
+
+			if(float_holder_x_100_padding>three_sf){
+				snprintf(int_part_lsb, FLOAT_DISP_PRESCISION, "%d", float_holder_x_100 % MOD_FACTOR); //int lsb
+			}else if(float_holder_x_100_padding>two_sf && float_holder_x_100_padding<=three_sf){
+				snprintf(decimal_part_msb, FLOAT_DISP_PRESCISION, "%d", float_holder_x_100 % MOD_FACTOR);
+			}else if(float_holder_x_100_padding>one_sf && float_holder_x_100_padding<=two_sf){
+				snprintf(decimal_part_lsb, FLOAT_DISP_PRESCISION, "%d", float_holder_x_100 % MOD_FACTOR);
+			}
+
 		}else if(float_holder_x_100>=one_digit && float_holder_x_100<one_sf){
-			//integer msb
-			snprintf(int_part_msb, FLOAT_DISP_PRESCISION, "%d", float_holder_x_100 % MOD_FACTOR);
+
+			if(float_holder_x_100_padding>three_sf){
+				snprintf(int_part_msb, FLOAT_DISP_PRESCISION, "%d", float_holder_x_100 % MOD_FACTOR); //integer msb
+			}else if(float_holder_x_100_padding>two_sf && float_holder_x_100_padding<=three_sf){
+				snprintf(int_part_lsb, FLOAT_DISP_PRESCISION, "%d", float_holder_x_100 % MOD_FACTOR); //integer lsb
+			}else if(float_holder_x_100_padding>one_sf && float_holder_x_100_padding<=two_sf){
+				snprintf(decimal_part_msb, FLOAT_DISP_PRESCISION, "%d", float_holder_x_100 % MOD_FACTOR);
+			}else if(float_holder_x_100_padding>=one_digit && float_holder_x_100_padding<=one_sf){
+				snprintf(decimal_part_lsb, FLOAT_DISP_PRESCISION, "%d", float_holder_x_100 % MOD_FACTOR);
+			}
+
 		}else if(float_holder_x_100<one_digit){
 			//exit on zero
 			break;
