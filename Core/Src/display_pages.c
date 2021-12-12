@@ -177,12 +177,12 @@ void draw_LoginPage(void){
 	draw_navigationBar();
 
 	/*Display Firmware Version*/
-	/*
+
 	int temp_firm_offset = 80;
 	ssd1306_SetCursor(temp_firm_offset, 55);
 	ssd1306_WriteString("VER:", Font_6x8, Black);
 	write_float_to_screen(VERSION_FIRMWARE,false,temp_firm_offset += (4*FONT_SMALL_WIDTH),55);
-	 */
+
 
 	/*Login Logic*/
 	int temp_login_offset = 20;
@@ -208,8 +208,7 @@ void draw_ESRPage(void){
 	ssd1306_WriteString("READING:", Font_6x8, Black);
 	ssd1306_SetCursor(60, 50);
 	ssd1306_WriteString("OHM", Font_6x8, Black);
-	//write_float_to_screen(measure_adc_reading(),true,4,40);
-	write_float_to_screen(esr_Table.cap_imp_data[0][1],true,4,40);
+	write_float_to_screen(VERSION_FIRMWARE,true,4,40);
 
 	/*Modes Display*/
 	int temp_mode_offset = 25;
@@ -224,10 +223,17 @@ void draw_ESRPage(void){
 }
 
 void draw_ESRTable(void){
+	const int TABLE_GAP = 5;
+
 	ssd1306_Fill(White);
 	draw_navigationBar();
 	/*ESR table*/
 
+	ssd1306_DrawRectangle(1, NAVIGATION_HEADER_HEIGHT + TABLE_GAP, SSD1306_WIDTH-1, 2* NAVIGATION_HEADER_HEIGHT , Black);
+	ssd1306_DrawRectangle(1, 2* NAVIGATION_HEADER_HEIGHT + TABLE_GAP, SSD1306_WIDTH-1, 3 * NAVIGATION_HEADER_HEIGHT , Black);
+	ssd1306_DrawRectangle(1, 3 * NAVIGATION_HEADER_HEIGHT + TABLE_GAP, SSD1306_WIDTH-1, 4 * NAVIGATION_HEADER_HEIGHT , Black);
+
+	ssd1306_UpdateScreen();
 }
 
 void draw_CalibrationPage(void){
@@ -378,15 +384,15 @@ void write_float_to_screen(float float_holder, bool is_Large_Font, int x_loc, in
 		ssd1306_SetCursor(x_loc+(4*FONT_LARGE_WIDTH), y_loc);
 		ssd1306_WriteString(decimal_part_lsb, Font_11x18, Black);
 	}else{
-		ssd1306_WriteString(int_part_msb, Font_11x18, Black);
+		ssd1306_WriteString(int_part_msb, Font_6x8, Black);
 		ssd1306_SetCursor(x_loc+FONT_SMALL_WIDTH, y_loc);
-		ssd1306_WriteString(int_part_lsb, Font_11x18, Black);
+		ssd1306_WriteString(int_part_lsb, Font_6x8, Black);
 		ssd1306_SetCursor(x_loc+(2*FONT_SMALL_WIDTH), y_loc);
 		ssd1306_WriteString(".", Font_6x8, Black);
 		ssd1306_SetCursor(x_loc+(3*FONT_SMALL_WIDTH), y_loc);
 		ssd1306_WriteString(decimal_part_msb, Font_6x8, Black);
-		ssd1306_SetCursor(x_loc+(4*FONT_LARGE_WIDTH), y_loc);
-		ssd1306_WriteString(decimal_part_lsb, Font_11x18, Black);
+		ssd1306_SetCursor(x_loc+(4*FONT_SMALL_WIDTH), y_loc);
+		ssd1306_WriteString(decimal_part_lsb, Font_6x8, Black);
 	}
 	ssd1306_UpdateScreen();
 }
