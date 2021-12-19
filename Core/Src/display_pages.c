@@ -155,11 +155,11 @@ void process_rotary(void){
 						esr_Table.vertical_scroll = !esr_Table.vertical_scroll;
 					}else if(get_rotaryState() == ROTATION_EVENT_CLOCKWISE){
 						if(esr_Table.vertical_scroll){
-							if(esr_Table.screen_offset_y < (CAP_HOLD - 1)){
+							if(esr_Table.screen_offset_y < (CAP_HOLD - 2)){
 								esr_Table.screen_offset_y ++;
 							}
 						}else{
-							if(esr_Table.screen_offset_x < (VOLT_HOLD - 1)){
+							if(esr_Table.screen_offset_x < (VOLT_HOLD - 2)){
 								esr_Table.screen_offset_x ++;
 							}
 						}
@@ -198,7 +198,7 @@ void process_rotary(void){
 
 void ESR_init_esr_table(void){
 	esrTable esr_Table_holder = {{10,16,25,35}, {4.7,10,22,47,100,220,470,1000},
-			{{40,35,29,24},{20,16,14,11},{9,7.5,6.2,5.1},{4.2,3.5,2.9,2.4},{2,1.6,1.4,1.1},{0.9,0.75,0.62,0.51},{0.42,0.35,0.29,0.24},{0.2,0.16,0.14,0.11}}, 0, 0, false};
+			{{40,35,29,24},{20,16,14,11},{9,7.5,6.2,5.1},{4.2,3.5,2.9,2.4},{2,1.6,1.4,1.1},{0.9,0.75,0.62,0.51},{0.42,0.35,0.29,0.24},{0.2,0.16,0.14,0.11}}, 0, 0, true};
 
 	esr_Table = esr_Table_holder;
 }
@@ -299,15 +299,27 @@ void draw_ESRTable(void){
 		//V Symbol
 		ssd1306_SetCursor(VERT_START_OFFSET + (i*VERT_TABLE_WIDTH) + V_SYMBOL_OFFSET, NAVIGATION_HEADER_HEIGHT + TEXT_VERT_OFFSET);
 		ssd1306_WriteString("V", Font_6x8, Black);
-		//draw cap voltage
-		write_int_to_screen(esr_Table.cap_param_volt[esr_Table.screen_offset_x + i], false, VERT_START_OFFSET + (i*VERT_TABLE_WIDTH) + TEXT_HORI_OFFSET + VOLTAGE_TEXT_HORI_OFFSET, NAVIGATION_HEADER_HEIGHT + TEXT_VERT_OFFSET);
+		//draw cap voltage and display focus
+		if(esr_Table.vertical_scroll){
+			write_int_to_screen(esr_Table.cap_param_volt[esr_Table.screen_offset_x + i], false, false, VERT_START_OFFSET + (i*VERT_TABLE_WIDTH) + TEXT_HORI_OFFSET + VOLTAGE_TEXT_HORI_OFFSET, NAVIGATION_HEADER_HEIGHT + TEXT_VERT_OFFSET);
+		}else{
+			write_int_to_screen(esr_Table.cap_param_volt[esr_Table.screen_offset_x + i], false, true, VERT_START_OFFSET + (i*VERT_TABLE_WIDTH) + TEXT_HORI_OFFSET + VOLTAGE_TEXT_HORI_OFFSET, NAVIGATION_HEADER_HEIGHT + TEXT_VERT_OFFSET);
+		}
 	}
 
 	//disp capacitance
 	ssd1306_SetCursor(TEXT_HORI_OFFSET, NAVIGATION_HEADER_HEIGHT + TEXT_VERT_OFFSET);
-	ssd1306_WriteString("CAP", Font_6x8, Black);
+	if(esr_Table.vertical_scroll){
+		ssd1306_WriteString("CAP", Font_6x8, White);
+	}else{
+		ssd1306_WriteString("CAP", Font_6x8, Black);
+	}
 	for(int i=0;i<MAX_ESR_TABLE_DISP; i++){
-		write_float_to_screen(esr_Table.cap_param_cap[esr_Table.screen_offset_y + i],false, TEXT_HORI_OFFSET, 2 * NAVIGATION_HEADER_HEIGHT + (i*NAVIGATION_HEADER_HEIGHT) + TEXT_VERT_OFFSET);
+		if(esr_Table.screen_offset_y == 0){
+			write_float_to_screen(esr_Table.cap_param_cap[esr_Table.screen_offset_y + i],false, TEXT_HORI_OFFSET, 2 * NAVIGATION_HEADER_HEIGHT + (i*NAVIGATION_HEADER_HEIGHT) + TEXT_VERT_OFFSET);
+		}else{
+			write_int_to_screen(esr_Table.cap_param_cap[esr_Table.screen_offset_y + i],false, false, TEXT_HORI_OFFSET, 2 * NAVIGATION_HEADER_HEIGHT + (i*NAVIGATION_HEADER_HEIGHT) + TEXT_VERT_OFFSET);
+		}
 	}
 
 	//disp contents
@@ -493,7 +505,7 @@ void write_float_to_screen(float float_holder, bool is_Large_Font, int x_loc, in
 	ssd1306_UpdateScreen();
 }
 
-void write_int_to_screen(int int_holder, bool is_Large_Font, int x_loc, int y_loc){
+void write_int_to_screen(int int_holder, bool is_Large_Font, bool text_color_white,int x_loc, int y_loc){
 
 	char int_str[INT_DISPLAY_STORAGE];
 
@@ -501,9 +513,18 @@ void write_int_to_screen(int int_holder, bool is_Large_Font, int x_loc, int y_lo
 
 	ssd1306_SetCursor(x_loc, y_loc);
 	if(is_Large_Font){
-		ssd1306_WriteString(int_str, Font_11x18, Black);;
+		if(text_color_white){
+			ssd1306_WriteString(int_str, Font_11x18, White);
+		}else{
+			ssd1306_WriteString(int_str, Font_11x18, Black);
+		}
+
 	}else{
-		ssd1306_WriteString(int_str, Font_6x8, Black);
+		if(text_color_white){
+			ssd1306_WriteString(int_str, Font_6x8, White);
+		}else{
+			ssd1306_WriteString(int_str, Font_6x8, Black);
+		}
 	}
 	ssd1306_UpdateScreen();
 }
