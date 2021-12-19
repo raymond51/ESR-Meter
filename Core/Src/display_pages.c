@@ -110,14 +110,11 @@ void ESR_PAGE(void){
 	case SETTINGS:
 		draw_SettingPage();
 		break;
-	case ENUM_PAGE_END:
-		//loop back to ESR
-		break;
 	default:
 		break;
 	}
 
-	reset_rotaryStatus();
+
 
 }
 
@@ -125,14 +122,10 @@ void process_rotary(void){
 
 	if(is_rotaryProcessed()!=true){
 
-		if(get_rotaryState() == LONG_BTN_PRESS){
-			mainNavigation.navigation_headerFocus = true;
-		}else if(get_rotaryState() == SHORT_BTN_PRESS){
-			mainNavigation.navigation_headerFocus = false;
-		}
-
 		if(mainNavigation.navigation_headerFocus){
-			if(get_rotaryState() == ROTATION_EVENT_CLOCKWISE){
+			if(get_rotaryState() == SHORT_BTN_PRESS){
+					mainNavigation.navigation_headerFocus = false;
+			} else if(get_rotaryState() == ROTATION_EVENT_CLOCKWISE){
 				if(mainNavigation.currPage<1){
 					mainNavigation.currPage = ENUM_PAGE_END - 1;
 				}else{
@@ -145,13 +138,67 @@ void process_rotary(void){
 					mainNavigation.currPage += 1;
 				}
 			}
+		}else{
+			//logic
+			if(get_rotaryState() == LONG_BTN_PRESS){
+				mainNavigation.navigation_headerFocus = true;
+			}else{
+			switch(mainNavigation.currPage){
+				case LOGIN:
+
+					break;
+				case ESR:
+
+					break;
+				case ESR_TABLE:
+					if(get_rotaryState() == SHORT_BTN_PRESS){
+						esr_Table.vertical_scroll = !esr_Table.vertical_scroll;
+					}else if(get_rotaryState() == ROTATION_EVENT_CLOCKWISE){
+						if(esr_Table.vertical_scroll){
+							if(esr_Table.screen_offset_y < (CAP_HOLD - 1)){
+								esr_Table.screen_offset_y ++;
+							}
+						}else{
+							if(esr_Table.screen_offset_x < (VOLT_HOLD - 1)){
+								esr_Table.screen_offset_x ++;
+							}
+						}
+					}else if(get_rotaryState() == ROTATION_EVENT_COUNTER_CLOCKWISE){
+						if(esr_Table.vertical_scroll){
+							if(esr_Table.screen_offset_y > 0){
+								esr_Table.screen_offset_y --;
+							}
+						}else{
+							if(esr_Table.screen_offset_x > 0){
+								esr_Table.screen_offset_x --;
+							}
+						}
+					}
+
+					break;
+				case CALIBRATION:
+
+					break;
+				case HISTORY_TERMINAL:
+
+					break;
+				case SETTINGS:
+
+					break;
+				default:
+					break;
+				}
+			}
 		}
 	}
+
+	reset_rotaryStatus();
+
 }
 
 void ESR_init_esr_table(void){
 	esrTable esr_Table_holder = {{10,16,25,35}, {4.7,10,22,47,100,220,470,1000},
-			{{40,35,29,24},{20,16,14,11},{9,7.5,6.2,5.1},{4.2,3.5,2.9,2.4},{2,1.6,1.4,1.1},{0.9,0.75,0.62,0.51},{0.42,0.35,0.29,0.24},{0.2,0.16,0.14,0.11}}, 0, 0, true};
+			{{40,35,29,24},{20,16,14,11},{9,7.5,6.2,5.1},{4.2,3.5,2.9,2.4},{2,1.6,1.4,1.1},{0.9,0.75,0.62,0.51},{0.42,0.35,0.29,0.24},{0.2,0.16,0.14,0.11}}, 0, 0, false};
 
 	esr_Table = esr_Table_holder;
 }
@@ -264,10 +311,10 @@ void draw_ESRTable(void){
 	}
 
 	//disp contents
-	for(int i=0;i<MAX_ESR_TABLE_DISP; i++){
-
-
-	}
+	write_float_to_screen(esr_Table.cap_imp_data[esr_Table.screen_offset_y][esr_Table.screen_offset_x],false, VERT_START_OFFSET  + TEXT_HORI_OFFSET, (2*NAVIGATION_HEADER_HEIGHT) + TEXT_VERT_OFFSET);
+	write_float_to_screen(esr_Table.cap_imp_data[esr_Table.screen_offset_y][esr_Table.screen_offset_x+1],false, VERT_START_OFFSET + VERT_TABLE_WIDTH + TEXT_HORI_OFFSET, (2*NAVIGATION_HEADER_HEIGHT) + TEXT_VERT_OFFSET);
+	write_float_to_screen(esr_Table.cap_imp_data[esr_Table.screen_offset_y+1][esr_Table.screen_offset_x],false, VERT_START_OFFSET + TEXT_HORI_OFFSET, (3*NAVIGATION_HEADER_HEIGHT) + TEXT_VERT_OFFSET);
+	write_float_to_screen(esr_Table.cap_imp_data[esr_Table.screen_offset_y+1][esr_Table.screen_offset_x+1],false, VERT_START_OFFSET + VERT_TABLE_WIDTH + TEXT_HORI_OFFSET, (3*NAVIGATION_HEADER_HEIGHT) + TEXT_VERT_OFFSET);
 	ssd1306_UpdateScreen();
 }
 
