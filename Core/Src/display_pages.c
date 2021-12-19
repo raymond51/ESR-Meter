@@ -231,6 +231,7 @@ void draw_ESRTable(void){
 	const int VERT_START_OFFSET = 40;
 	const int TEXT_VERT_OFFSET = 8;
 	const int TEXT_HORI_OFFSET = 4;
+	const int VOLTAGE_TEXT_HORI_OFFSET = 10;
 	const int V_SYMBOL_OFFSET = 34;
 	const int VERT_TABLE_WIDTH = ((SSD1306_WIDTH-1)-VERT_START_OFFSET)/2;
 
@@ -251,12 +252,22 @@ void draw_ESRTable(void){
 		//V Symbol
 		ssd1306_SetCursor(VERT_START_OFFSET + (i*VERT_TABLE_WIDTH) + V_SYMBOL_OFFSET, NAVIGATION_HEADER_HEIGHT + TEXT_VERT_OFFSET);
 		ssd1306_WriteString("V", Font_6x8, Black);
-
+		//draw cap voltage
+		write_int_to_screen(esr_Table.cap_param_volt[esr_Table.screen_offset_x + i], false, VERT_START_OFFSET + (i*VERT_TABLE_WIDTH) + TEXT_HORI_OFFSET + VOLTAGE_TEXT_HORI_OFFSET, NAVIGATION_HEADER_HEIGHT + TEXT_VERT_OFFSET);
 	}
+
 	//disp capacitance
+	ssd1306_SetCursor(TEXT_HORI_OFFSET, NAVIGATION_HEADER_HEIGHT + TEXT_VERT_OFFSET);
+	ssd1306_WriteString("CAP", Font_6x8, Black);
+	for(int i=0;i<MAX_ESR_TABLE_DISP; i++){
+		write_float_to_screen(esr_Table.cap_param_cap[esr_Table.screen_offset_y + i],false, TEXT_HORI_OFFSET, 2 * NAVIGATION_HEADER_HEIGHT + (i*NAVIGATION_HEADER_HEIGHT) + TEXT_VERT_OFFSET);
+	}
 
 	//disp contents
+	for(int i=0;i<MAX_ESR_TABLE_DISP; i++){
 
+
+	}
 	ssd1306_UpdateScreen();
 }
 
