@@ -45,12 +45,16 @@ typedef struct
 
 #define VOLT_HOLD 4
 #define CAP_HOLD 8
+#define MAX_ESR_TABLE_DISP 2
 
 typedef struct
 {
 	int cap_param_volt[VOLT_HOLD];
 	float cap_param_cap[CAP_HOLD];
 	float cap_imp_data[CAP_HOLD][VOLT_HOLD];
+	uint8_t screen_offset_x;
+	uint8_t screen_offset_y;
+	bool vertical_scroll;
 }esrTable;
 
 static ringBuffer terminalBuf = {{0}, 0}; //fixed size to prevent further memory allocation
@@ -147,7 +151,7 @@ void process_rotary(void){
 
 void ESR_init_esr_table(void){
 	esrTable esr_Table_holder = {{10,16,25,35}, {4.7,10,22,47,100,220,470,1000},
-			{{40,35,29,24},{20,16,14,11},{9,7.5,6.2,5.1},{4.2,3.5,2.9,2.4},{2,1.6,1.4,1.1},{0.9,0.75,0.62,0.51},{0.42,0.35,0.29,0.24},{0.2,0.16,0.14,0.11}}};
+			{{40,35,29,24},{20,16,14,11},{9,7.5,6.2,5.1},{4.2,3.5,2.9,2.4},{2,1.6,1.4,1.1},{0.9,0.75,0.62,0.51},{0.42,0.35,0.29,0.24},{0.2,0.16,0.14,0.11}}, 0, 0, true};
 
 	esr_Table = esr_Table_holder;
 }
@@ -225,6 +229,9 @@ void draw_ESRPage(void){
 void draw_ESRTable(void){
 	const int TABLE_GAP = 5;
 	const int VERT_START_OFFSET = 40;
+	const int TEXT_VERT_OFFSET = 8;
+	const int TEXT_HORI_OFFSET = 4;
+	const int V_SYMBOL_OFFSET = 34;
 	const int VERT_TABLE_WIDTH = ((SSD1306_WIDTH-1)-VERT_START_OFFSET)/2;
 
 	ssd1306_Fill(White);
@@ -239,6 +246,16 @@ void draw_ESRTable(void){
 	//Vertical Rect
 	ssd1306_DrawRectangle(VERT_START_OFFSET, NAVIGATION_HEADER_HEIGHT + TABLE_GAP, VERT_TABLE_WIDTH + VERT_START_OFFSET, 4 * NAVIGATION_HEADER_HEIGHT + TABLE_GAP, Black);
 
+	//disp voltage
+	for(int i=0;i<MAX_ESR_TABLE_DISP; i++){
+		//V Symbol
+		ssd1306_SetCursor(VERT_START_OFFSET + (i*VERT_TABLE_WIDTH) + V_SYMBOL_OFFSET, NAVIGATION_HEADER_HEIGHT + TEXT_VERT_OFFSET);
+		ssd1306_WriteString("V", Font_6x8, Black);
+
+	}
+	//disp capacitance
+
+	//disp contents
 
 	ssd1306_UpdateScreen();
 }
@@ -256,10 +273,24 @@ void draw_HistoryTerminal(void){
 }
 
 void draw_SettingPage(void){
+
+	const int text_gap = 4;
+
 	ssd1306_Fill(White);
 	draw_navigationBar();
+
 	/*Setting Page*/
 
+	ssd1306_SetCursor(2, NAVIGATION_HEADER_HEIGHT + text_gap);
+	ssd1306_WriteString("POWER OFF:", Font_6x8, Black);
+	ssd1306_SetCursor(2, 2*NAVIGATION_HEADER_HEIGHT + text_gap);
+	ssd1306_WriteString("POWER OFF TIMER:", Font_6x8, Black);
+	ssd1306_SetCursor(2, 3*NAVIGATION_HEADER_HEIGHT + text_gap);
+	ssd1306_WriteString("AUTO-CAL:", Font_6x8, Black);
+	//ssd1306_SetCursor(2, 4*NAVIGATION_HEADER_HEIGHT + text_gap);
+	//ssd1306_WriteString("PIEZO VOL::", Font_6x8, Black);
+
+	ssd1306_UpdateScreen();
 }
 
 void draw_navigationBar(void){
