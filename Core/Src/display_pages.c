@@ -89,6 +89,7 @@ void ESR_INIT(void){
 */
 void ESR_PAGE(void){
 
+
 	process_rotary();
 
 	switch(mainNavigation.currPage){
