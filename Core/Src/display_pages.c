@@ -57,9 +57,17 @@ typedef struct
 	bool vertical_scroll;
 }esrTable;
 
+typedef struct
+{
+	uint8_t curr_selected_setting;
+	uint8_t setting_pages;
+	uint8_t settings_per_page;
+}settingPage;
+
 static ringBuffer terminalBuf = {{0}, 0}; //fixed size to prevent further memory allocation
 static navigationHeader mainNavigation = {{"LOGIN","ESR", "ESR TABLE","CALIBRATION", "TERMINAL","SETTINGS"}, LOGIN, false, true};
 static esrTable esr_Table;
+static settingPage setting;
 
 /**
 * @brief ring buffer init
@@ -82,6 +90,7 @@ void input_ringBuffer(char c){
 
 void ESR_INIT(void){
 	ESR_init_esr_table();
+	ESR_init_setting_page();
 }
 
 /**
@@ -187,7 +196,17 @@ void process_rotary(void){
 
 					break;
 				case SETTINGS:
+					if(get_rotaryState() == SHORT_BTN_PRESS){
 
+					}else if(get_rotaryState() == ROTATION_EVENT_CLOCKWISE){
+						if(setting.curr_selected_setting < (setting.setting_pages * setting.settings_per_page) - 1){
+							setting.curr_selected_setting++;
+						}
+					}else if(get_rotaryState() == ROTATION_EVENT_COUNTER_CLOCKWISE){
+						if(setting.curr_selected_setting > 1){
+							setting.curr_selected_setting--;
+						}
+					}
 					break;
 				default:
 					break;
@@ -204,6 +223,11 @@ void ESR_init_esr_table(void){
 			{{40,35,29,24},{20,16,14,11},{9,7.5,6.2,5.1},{4.2,3.5,2.9,2.4},{2,1.6,1.4,1.1},{0.9,0.75,0.62,0.51},{0.42,0.35,0.29,0.24},{0.2,0.16,0.14,0.11}}, 0, 0, true};
 
 	esr_Table = esr_Table_holder;
+}
+
+void ESR_init_setting_page(void){
+	settingPage setting_page_holder = {1, 2, 3};
+	setting = setting_page_holder;
 }
 
 /**
@@ -355,15 +379,30 @@ void draw_SettingPage(void){
 	draw_navigationBar();
 
 	/*Setting Page*/
+	if(setting.curr_selected_setting <= setting.settings_per_page){
 
 	ssd1306_SetCursor(2, NAVIGATION_HEADER_HEIGHT + text_gap);
-	ssd1306_WriteString("POWER OFF:", Font_6x8, Black);
+	if(setting.curr_selected_setting == 1){ssd1306_WriteString("POWER OFF:", Font_6x8, White);}else{ssd1306_WriteString("POWER OFF:", Font_6x8, Black);}
+
 	ssd1306_SetCursor(2, 2*NAVIGATION_HEADER_HEIGHT + text_gap);
-	ssd1306_WriteString("POWER OFF TIMER:", Font_6x8, Black);
+	if(setting.curr_selected_setting == 2){ssd1306_WriteString("POWER OFF TIMER:", Font_6x8, White);}else{ssd1306_WriteString("POWER OFF TIMER:", Font_6x8, Black);}
+
 	ssd1306_SetCursor(2, 3*NAVIGATION_HEADER_HEIGHT + text_gap);
-	ssd1306_WriteString("AUTO-CAL:", Font_6x8, Black);
-	//ssd1306_SetCursor(2, 4*NAVIGATION_HEADER_HEIGHT + text_gap);
-	//ssd1306_WriteString("PIEZO VOL::", Font_6x8, Black);
+	if(setting.curr_selected_setting == 3){ssd1306_WriteString("AUTO-CAL:", Font_6x8, White);}else{ssd1306_WriteString("AUTO-CAL:", Font_6x8, Black);}
+
+	}else{
+
+	ssd1306_SetCursor(2, NAVIGATION_HEADER_HEIGHT + text_gap);
+	if(setting.curr_selected_setting == 4){ssd1306_WriteString("PIEZO VOL:", Font_6x8, White);}else{ssd1306_WriteString("PIEZO VOL:", Font_6x8, Black);}
+
+	ssd1306_SetCursor(2, 2*NAVIGATION_HEADER_HEIGHT + text_gap);
+	if(setting.curr_selected_setting == 5){ssd1306_WriteString("DISABLE LOGIN:", Font_6x8, White);}else{ssd1306_WriteString("DISABLE LOGIN:", Font_6x8, Black);}
+
+	ssd1306_SetCursor(2, 3*NAVIGATION_HEADER_HEIGHT + text_gap);
+	if(setting.curr_selected_setting == 6){ssd1306_WriteString("SIGN OUT:", Font_6x8, Black);}else{ssd1306_WriteString("SIGN OUT:", Font_6x8, Black);}
+
+	}
+
 
 	ssd1306_UpdateScreen();
 }
