@@ -92,6 +92,8 @@ void ESR_PAGE(void){
 
 	process_rotary();
 
+	if(get_rotaryState() != IDLE){
+
 	switch(mainNavigation.currPage){
 	case LOGIN:
 		draw_LoginPage();
@@ -115,7 +117,8 @@ void ESR_PAGE(void){
 		break;
 	}
 
-
+	}
+	reset_rotaryStatus();
 
 }
 
@@ -193,7 +196,6 @@ void process_rotary(void){
 		}
 	}
 
-	reset_rotaryStatus();
 
 }
 
@@ -260,7 +262,9 @@ void draw_ESRPage(void){
 	ssd1306_WriteString("READING:", Font_6x8, Black);
 	ssd1306_SetCursor(60, 50);
 	ssd1306_WriteString("OHM", Font_6x8, Black);
-	write_float_to_screen(VERSION_FIRMWARE,true,4,40);
+
+	//write_float_to_screen(VERSION_FIRMWARE,true,4,40);
+	write_float_to_screen(impedance_reading(measure_adc_reading()),true,4,40);
 
 	/*Modes Display*/
 	int temp_mode_offset = 25;

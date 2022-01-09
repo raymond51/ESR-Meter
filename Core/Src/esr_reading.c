@@ -7,13 +7,13 @@
 static ADC_HandleTypeDef hadc;
 static volatile uint16_t adc_ResultDMA[2];
 static volatile int adcConversionComplete=0; //set by callback
-static float adc_reading;
 
 /**
 * @brief setup for accurate adc sampling
 */
 float measure_adc_reading(void){
 
+	float adc_reading;
 	uint16_t acc_adc_ResultDMA=0;
 
 	enable_analog_power();
@@ -39,9 +39,21 @@ float measure_adc_reading(void){
 	/*conversion*/
 	//adc_reading = (adc_ResultDMA[0]*ADC_VOLTAGE/0x0FFF); //sig before LPF
 	adc_reading = (acc_adc_ResultDMA*ADC_VOLTAGE/0x0FFF);
-	disable_analog_power();
+	//disable_analog_power();
 
 	return adc_reading;
+}
+
+/**
+* @brief convert measured adc to estimated impedance
+*/
+
+float impedance_reading(float adc_reading){
+	float est_impedance;
+	//gain offset calcualed based of readings: 2.01V @ 1R, 0.75 @ 10R
+	const float gain = -7.14, offset = 15.35;
+	est_impedance = gain * adc_reading + offset;
+	return est_impedance;
 }
 
 /**

@@ -57,6 +57,7 @@ void process_rotary_sw(void){
 	/*update the state in other lib i.e displayPages*/
 	switch(RotaryStates){
 	case IDLE:
+		set_rotaryState(IDLE);
 		break;
 	case BUTTON_PRESS_EVENT:
 		HAL_Delay(DEBOUNCE_DELAY_5MS); //debounce duration
