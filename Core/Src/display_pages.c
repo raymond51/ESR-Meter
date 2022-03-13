@@ -13,6 +13,10 @@
 #define FONT_LARGE_WIDTH 11
 #define NAVIGATION_HEADER_HEIGHT 14
 
+#define BUFFER_SIZE 10
+#define RING_BUFFER_SIZE 3 //buffer structure for terminal debug ouput
+#define RING_BUFFER_SIZE_STR 18
+
 typedef enum page_states
 {
 	LOGIN=1,
@@ -25,11 +29,10 @@ typedef enum page_states
 
 }page_states;
 
-//buffer structure for terminal debug ouput
-#define BUFFER_SIZE 10
 typedef struct
 {
-	uint8_t data[BUFFER_SIZE];
+	char data[RING_BUFFER_SIZE][RING_BUFFER_SIZE_STR];
+	uint8_t *head;
 	uint8_t *writeIndex;
 
 }ringBuffer;
@@ -64,24 +67,39 @@ typedef struct
 	uint8_t settings_per_page;
 }settingPage;
 
-static ringBuffer terminalBuf = {{0}, 0}; //fixed size to prevent further memory allocation
+static ringBuffer terminalBuf = {{{0}}, 0}; //fixed size to prevent further memory allocation
 static navigationHeader mainNavigation = {{"LOGIN","ESR", "ESR TABLE","CALIBRATION", "TERMINAL","SETTINGS"}, LOGIN, false, true};
 static esrTable esr_Table;
 static settingPage setting;
 
 /**
-* @brief ring buffer init
+* @brief ring buffer init and reset buffer
 */
 void init_ringBuffer(void){
-	terminalBuf.writeIndex = (uint8_t *) terminalBuf.data; //reset pointer
+	terminalBuf.head = (uint8_t *) terminalBuf.data;
+
+	for(int i=0;i<RING_BUFFER_SIZE;i++){
+		strcpy(terminalBuf.data[i], "EMPTY");
+	}
+
+	terminalBuf.writeIndex = terminalBuf.head; //reset pointer
 }
+
+int temp = 55;
 
 /**
 * @brief ring buffer storing
 */
-void input_ringBuffer(char c){
-//check for end of buffer to wrap around
+void input_ringBuffer(char *str){
 
+	//strcpy(terminalBuf.data[terminalBuf.writeIndex - terminalBuf.head], str);
+	sprintf(&terminalBuf.data[terminalBuf.writeIndex - terminalBuf.head], "%i", temp);
+	terminalBuf.writeIndex ++;
+
+	//check for end of buffer to wrap around
+	if(terminalBuf.writeIndex > terminalBuf.head + RING_BUFFER_SIZE - 1){
+		terminalBuf.writeIndex = terminalBuf.head;
+	}
 }
 
 /**
@@ -90,7 +108,9 @@ void input_ringBuffer(char c){
 
 void ESR_INIT(void){
 	ESR_init_esr_table();
+	ESR_init_terminal();
 	ESR_init_setting_page();
+
 }
 
 /**
@@ -193,7 +213,10 @@ void process_rotary(void){
 
 					break;
 				case HISTORY_TERMINAL:
-
+					if(get_rotaryState() == SHORT_BTN_PRESS){
+						input_ringBuffer("ok");
+						temp++;
+					}
 					break;
 				case SETTINGS:
 					if(get_rotaryState() == SHORT_BTN_PRESS){
@@ -229,6 +252,11 @@ void ESR_init_setting_page(void){
 	settingPage setting_page_holder = {1, 2, 3};
 	setting = setting_page_holder;
 }
+
+void ESR_init_terminal(void){
+	init_ringBuffer();
+}
+
 
 /**
 * @brief Render and display splash screen briefly
@@ -366,9 +394,49 @@ void draw_CalibrationPage(void){
 }
 
 void draw_HistoryTerminal(void){
+
+	const int HEADER_VERT_OFFSET = 20;
+	const int TEXT_HORI_OFFSET = 4;
+	const int TEXT_VERT_OFFSET = 10;
+
 	ssd1306_Fill(White);
 	draw_navigationBar();
 	/*History Page*/
+
+
+
+
+	/*
+	ssd1306_SetCursor(TEXT_HORI_OFFSET, HEADER_VERT_OFFSET);
+	ssd1306_WriteString("History Current", Font_6x8, Black);
+	ssd1306_SetCursor(TEXT_HORI_OFFSET, HEADER_VERT_OFFSET + TEXT_VERT_OFFSET);
+	//ssd1306_WriteString("Oi Current", Font_6x8, Black);
+	//ssd1306_WriteString(greeting, Font_6x8, Black);
+	ssd1306_WriteString(terminalBuf.data[0], Font_6x8, Black);
+	 */
+
+	ssd1306_SetCursor(TEXT_HORI_OFFSET, HEADER_VERT_OFFSET);
+	ssd1306_WriteString("History Current", Font_6x8, Black);
+
+	for(int i=0; i<RING_BUFFER_SIZE; i++){
+		ssd1306_SetCursor(TEXT_HORI_OFFSET, HEADER_VERT_OFFSET + TEXT_VERT_OFFSET * (i + 1));
+		//display oldest action first
+		if(terminalBuf.writeIndex + i + 1 > terminalBuf.head + RING_BUFFER_SIZE){
+			ssd1306_WriteString(terminalBuf.data[i], Font_6x8, Black);
+		}
+		else{
+			ssd1306_WriteString(terminalBuf.data[(terminalBuf.writeIndex - terminalBuf.head) + i], Font_6x8, Black);
+		}
+	}
+
+	char tempStr[10];
+	ssd1306_SetCursor(TEXT_HORI_OFFSET+40, HEADER_VERT_OFFSET + TEXT_VERT_OFFSET * 3);
+	sprintf(&tempStr, "%i", (terminalBuf.writeIndex - terminalBuf.head));
+
+	ssd1306_WriteString(tempStr, Font_6x8, Black);
+
+
+	ssd1306_UpdateScreen();
 }
 
 void draw_SettingPage(void){
