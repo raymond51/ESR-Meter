@@ -316,7 +316,8 @@ void draw_ESRPage(void){
 	ssd1306_WriteString("OHM", Font_6x8, Black);
 
 	//write_float_to_screen(VERSION_FIRMWARE,true,4,40);
-	write_float_to_screen(impedance_reading_linear(measure_adc_reading()),true,4,40);
+	//write_float_to_screen(impedance_reading_linear(measure_adc_reading()),true,4,40);
+	write_float_to_screen(impedance_reading_cubic(measure_adc_reading()),true,4,40);
 
 	/*Modes Display*/
 	int temp_mode_offset = 25;
@@ -391,6 +392,17 @@ void draw_CalibrationPage(void){
 	ssd1306_Fill(White);
 	draw_navigationBar();
 	/*Calibration Page*/
+
+	/*Reading display*/
+	ssd1306_SetCursor(4, 25);
+	ssd1306_WriteString("READING:", Font_6x8, Black);
+	ssd1306_SetCursor(60, 50);
+	ssd1306_WriteString("V", Font_6x8, Black);
+
+	//write_float_to_screen(VERSION_FIRMWARE,true,4,40);
+	//write_float_to_screen(impedance_reading_linear(measure_adc_reading()),true,4,40);
+	write_float_to_screen(measure_adc_reading(),true,4,40);
+
 }
 
 void draw_HistoryTerminal(void){

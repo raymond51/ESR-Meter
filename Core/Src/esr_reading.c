@@ -63,9 +63,9 @@ float impedance_reading_linear(float adc_reading){
 float impedance_reading_cubic(float adc_reading){
 	float est_impedance;
 
-	float new_meas = 2.65;//TODO
-	float cal_res_y[SIZE] = {0.1, 0.2, 0.3, 0.5, 1, 2, 5, 10, 20};
-	float cal_voltage_x[SIZE] = {0.7, 0.9, 1, 1.3, 1.7, 2, 2.5, 2.7, 3};
+	float new_meas = 2.8;//TODO - voltage point
+	float cal_res_y[CALIB_POINTS] = {0.1, 0.2, 0.3, 0.5, 1, 2, 5, 10, 20};
+	float cal_voltage_x[CALIB_POINTS] = {0.7, 0.9, 1, 1.3, 1.7, 2, 2.5, 2.7, 3};
 
 	est_impedance = cubic_interp1d(new_meas, cal_voltage_x, cal_res_y);
 
