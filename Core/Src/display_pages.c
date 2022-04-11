@@ -404,6 +404,15 @@ void draw_HistoryTerminal(void){
 	/*History Page*/
 
 
+	int arr_temp[RING_BUFFER_SIZE] = {0};
+
+	for(int i=0;i<RING_BUFFER_SIZE;i++){
+		if(terminalBuf.writeIndex + i > terminalBuf.head + RING_BUFFER_SIZE){
+			arr_temp[i] = i - (RING_BUFFER_SIZE - (terminalBuf.writeIndex - terminalBuf.head)) ;
+		}else{
+			arr_temp[i] = (terminalBuf.writeIndex - terminalBuf.head) + i;
+		}
+	}
 
 
 	/*
@@ -418,15 +427,23 @@ void draw_HistoryTerminal(void){
 	ssd1306_SetCursor(TEXT_HORI_OFFSET, HEADER_VERT_OFFSET);
 	ssd1306_WriteString("History Current", Font_6x8, Black);
 
+	/*
 	for(int i=0; i<RING_BUFFER_SIZE; i++){
 		ssd1306_SetCursor(TEXT_HORI_OFFSET, HEADER_VERT_OFFSET + TEXT_VERT_OFFSET * (i + 1));
 		//display oldest action first
-		if(terminalBuf.writeIndex + i + 1 > terminalBuf.head + RING_BUFFER_SIZE){
+		if(terminalBuf.writeIndex + i > terminalBuf.head + RING_BUFFER_SIZE){
 			ssd1306_WriteString(terminalBuf.data[i], Font_6x8, Black);
 		}
 		else{
 			ssd1306_WriteString(terminalBuf.data[(terminalBuf.writeIndex - terminalBuf.head) + i], Font_6x8, Black);
 		}
+	}
+	*/
+	for(int i=0; i<RING_BUFFER_SIZE; i++){
+		ssd1306_SetCursor(TEXT_HORI_OFFSET, HEADER_VERT_OFFSET + TEXT_VERT_OFFSET * (i + 1));
+
+			ssd1306_WriteString(terminalBuf.data[arr_temp[i]], Font_6x8, Black);
+
 	}
 
 	char tempStr[10];
