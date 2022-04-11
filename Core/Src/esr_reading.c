@@ -48,11 +48,27 @@ float measure_adc_reading(void){
 * @brief convert measured adc to estimated impedance
 */
 
-float impedance_reading(float adc_reading){
+float impedance_reading_linear(float adc_reading){
 	float est_impedance;
-	//gain offset calcualed based of readings: 2.01V @ 1R, 0.75 @ 10R
+	//gain offset calculated based of readings: 2.01V @ 1R, 0.75 @ 10R
 	const float gain = -7.14, offset = 15.35;
 	est_impedance = gain * adc_reading + offset;
+	return est_impedance;
+}
+
+/**
+* @brief convert measured adc to estimated impedance using cubic spline interpolation curve
+*/
+
+float impedance_reading_cubic(float adc_reading){
+	float est_impedance;
+
+	float new_meas = 2.65;//TODO
+	float cal_res_y[SIZE] = {0.1, 0.2, 0.3, 0.5, 1, 2, 5, 10, 20};
+	float cal_voltage_x[SIZE] = {0.7, 0.9, 1, 1.3, 1.7, 2, 2.5, 2.7, 3};
+
+	est_impedance = cubic_interp1d(new_meas, cal_voltage_x, cal_res_y);
+
 	return est_impedance;
 }
 
@@ -83,4 +99,110 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	adcConversionComplete = 1;// Conversion Complete & DMA Transfer Complete As Well
     // Update with Latest ADC Conversion Result
+}
+
+/**
+* @brief
+*/
+void diff(float *data, float *x_diff, int data_size)
+{
+        float present_data = *data;
+        float next_data = 0.0;
+
+        for (int i = 0; i < data_size - 1; i++)
+        {
+                next_data = *(++data);
+                *(x_diff)++ = next_data - present_data;
+                present_data = next_data;
+        }
+}
+
+int index_search(float *arr, int size, float temp)
+{
+        int counter = 0;
+        for (int i = 0; i < size; i++)
+        {
+                if (temp > *arr++){counter++;}else{break;}
+        }
+
+        return counter;
+}
+
+// store only the voltages values from calibration into eeprom
+
+float cubic_interp1d(float measured_voltage, float *x, float *y)
+{
+
+        float f0 = 0.0;
+        int index = -1;
+
+        float xi1, xi0, yi1, yi0, zi1, zi0, hi1 = 0;
+
+        // store num array of difference
+        float x_diff[CALIB_POINTS - 1] = {0};
+        float y_diff[CALIB_POINTS - 1] = {0};
+
+        diff(x, x_diff, CALIB_POINTS);
+        diff(y, y_diff, CALIB_POINTS);
+
+        // allocate buffer matrices
+        float Li[CALIB_POINTS] = {0};
+        float Li_1[CALIB_POINTS - 1] = {0};
+        float z[CALIB_POINTS] = {0};
+
+        // fill diagonals Li and Li-1 and solve [L][y] = [B]
+
+        Li[0] = sqrt(2 * x_diff[0]);
+        Li_1[0] = 0.0;
+        float B0 = 0.0; // natural boundary
+        float Bi = 0.0;
+        z[0] = B0 / Li[0];
+
+        for (int i = 1; i < CALIB_POINTS - 1; i++)
+        {
+                Li_1[i] = x_diff[i - 1] / Li[i - 1];
+                Li[i] = sqrt(2 * (x_diff[i - 1] + x_diff[i]) - Li_1[i - 1] * Li_1[i - 1]);
+                Bi = 6 * (y_diff[i] / x_diff[i] - y_diff[i - 1] / x_diff[i - 1]);
+                z[i] = (Bi - Li_1[i - 1] * z[i - 1]) / Li[i];
+
+        }
+
+        int i = CALIB_POINTS - 1;
+        Li_1[i - 1] = x_diff[i - 1] / Li[i - 1];
+        Li[i] = sqrt(2 * x_diff[i - 1] - Li_1[i - 1] * Li_1[i - 1]);
+        Bi = 0.0; // natural boundary
+        z[i] = (Bi - Li_1[i - 1] * z[i - 1]) / Li[i];
+
+        // solve [L.T][x] = [y]
+        i = CALIB_POINTS - 1;
+        z[i] = z[i] / Li[i];
+
+        for (int i = CALIB_POINTS - 2; i >= 0; i--)
+        {
+                z[i] = (z[i] - Li_1[i - 1] * z[i + 1]) / Li[i];
+        }
+
+        // find index for bracket within x
+        index = index_search(x, CALIB_POINTS, measured_voltage);
+
+        // interpolation brackets
+        xi1 = x[index];
+        xi0 = x[index - 1];
+        yi1 = y[index];
+        yi0 = y[index - 1];
+        zi1 = z[index];
+        zi0 = z[index - 1];
+        hi1 = xi1 - xi0;
+
+        // calculate cubic
+        if (measured_voltage <= (float)3.0)
+        {
+                f0 = zi0 / (6 * hi1) * pow(xi1 - measured_voltage, 3) + zi1 / (6 * hi1) * pow(measured_voltage - xi0, 3) + (yi1 / hi1 - zi1 * hi1 / 6) * (measured_voltage - xi0) + (yi0 / hi1 - zi0 * hi1 / 6) * (xi1 - measured_voltage);
+        }
+        else
+        {
+                f0 = -1; // err
+        }
+
+        return f0;
 }
