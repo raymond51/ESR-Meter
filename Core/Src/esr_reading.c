@@ -7,7 +7,7 @@
 static ADC_HandleTypeDef hadc;
 static volatile uint16_t adc_ResultDMA[2];
 static volatile int adcConversionComplete=0; //set by callback
-
+static volatile int raw_adc;
 /**
 * @brief setup for accurate adc sampling
 */
@@ -35,6 +35,7 @@ float measure_adc_reading(void){
 	}
 
 	acc_adc_ResultDMA /= TWENTY_POINT_AVE;
+	raw_adc = acc_adc_ResultDMA;
 
 	/*conversion*/
 	//adc_reading = (adc_ResultDMA[0]*ADC_VOLTAGE/0x0FFF); //sig before LPF
@@ -42,6 +43,10 @@ float measure_adc_reading(void){
 	//disable_analog_power();
 
 	return adc_reading;
+}
+
+int adc_reading_raw(){
+	return raw_adc;
 }
 
 /**
@@ -63,11 +68,11 @@ float impedance_reading_linear(float adc_reading){
 float impedance_reading_cubic(float adc_reading){
 	float est_impedance;
 
-	float new_meas = 2.8;//TODO - voltage point
-	float cal_res_y[CALIB_POINTS] = {0.1, 0.2, 0.3, 0.5, 1, 2, 5, 10, 20};
-	float cal_voltage_x[CALIB_POINTS] = {0.7, 0.9, 1, 1.3, 1.7, 2, 2.5, 2.7, 3};
+	float cal_res_y[CALIB_POINTS] = {50, 40, 30, 20, 10, 5, 2, 1, 0.5, 0.3, 0.2, 0.1};
+	float cal_adc_raw_x[CALIB_POINTS] = {ESR_MAX_OHM_ADC_RAW, 472, 523, 627, 912, 1327, 1969, 2390, 2527, 2623, 2675, MAX_ADC_RAW};
 
-	est_impedance = cubic_interp1d(new_meas, cal_voltage_x, cal_res_y);
+
+	est_impedance = cubic_interp1d(adc_reading, cal_adc_raw_x, cal_res_y);
 
 	return est_impedance;
 }
@@ -195,13 +200,15 @@ float cubic_interp1d(float measured_voltage, float *x, float *y)
         hi1 = xi1 - xi0;
 
         // calculate cubic
-        if (measured_voltage <= (float)3.0)
+        if (measured_voltage <= (float) MAX_ADC_RAW && measured_voltage > ESR_MAX_OHM_ADC_RAW)
         {
                 f0 = zi0 / (6 * hi1) * pow(xi1 - measured_voltage, 3) + zi1 / (6 * hi1) * pow(measured_voltage - xi0, 3) + (yi1 / hi1 - zi1 * hi1 / 6) * (measured_voltage - xi0) + (yi0 / hi1 - zi0 * hi1 / 6) * (xi1 - measured_voltage);
         }
-        else
+        else if (measured_voltage < ESR_MAX_OHM_ADC_RAW)
         {
-                f0 = -1; // err
+                f0 = 50;
+        }else{
+        		f0 = -1;
         }
 
         return f0;
