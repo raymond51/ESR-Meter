@@ -29,8 +29,8 @@ A low cost and low power ESR meter design for in-circuit measurements
 
 <img src="img/front_panel.jpg" alt="drawing" width="800"/>
 
-<img src="img/3d_PCB.png" alt="drawing1" width="700"/>
+<img src="img/3d_PCB.jpg" alt="drawing1" width="700"/>
 
 <p align="center">
-<img src="img/Calib_curve.png" alt="drawing2" width="400"/>
+<img src="img/Calib_curve.jpg" alt="drawing2" width="400"/>
 </p>
