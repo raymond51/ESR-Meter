@@ -37,7 +37,7 @@ A low cost and low power ESR meter design for in-circuit measurements
 | <img src="img/3d_PCB.jpg" alt="drawing1" width="800"/> | 
 
 
-| *Curve approximation with Cubic Spline Interpolation* |
+| *Curve approximation* |
 |:--:| 
 | <p align="center"><img src="img/Calib_curve.jpg" alt="drawing2" width="600"/> </p>| 
 
